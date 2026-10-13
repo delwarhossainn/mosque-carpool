@@ -8,6 +8,23 @@
 header('Content-Type: text/plain; charset=utf-8');
 require_once __DIR__ . '/config.php';
 
+// ---- Diagnostics: what does PHP actually see? (no secret values) ----
+echo "=== Environment seen by PHP ===\n";
+foreach (['MYSQLHOST','MYSQLPORT','MYSQLDATABASE','MYSQLUSER','MYSQLPASSWORD',
+          'MYSQL_URL','MYSQL_DATABASE','MYSQL_ROOT_PASSWORD'] as $k) {
+    $v = getenv($k);
+    if ($v === false)  echo "$k: (not set)\n";
+    elseif ($v === '') echo "$k: (empty string)\n";
+    else               echo "$k: (set, ".strlen($v)." chars)\n";
+}
+echo "\n=== Resolved DB config ===\n";
+echo "DB_HOST=".DB_HOST."\n";
+echo "DB_PORT=".DB_PORT."\n";
+echo "DB_NAME=".DB_NAME."\n";
+echo "DB_USER=".DB_USER."\n";
+echo "DB_PASS: ".(DB_PASS === '' ? '(empty)' : '(set)')."\n\n";
+
+// ---- Import schema ----
 try {
     $pdo = new PDO(
         'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=utf8mb4',
@@ -38,5 +55,4 @@ try {
 } catch (Throwable $e) {
     http_response_code(500);
     echo "FAILED: " . $e->getMessage() . "\n";
-    echo "Check that the MYSQL* variables are set on the Railway service.";
 }
