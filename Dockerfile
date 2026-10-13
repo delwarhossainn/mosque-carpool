@@ -1,8 +1,12 @@
 # Mosque Carpool — Railway deploy (PHP 8.2 + Apache + MySQL driver)
 FROM php:8.2-apache
 
-# MySQL driver (mysqlnd handles Railway MySQL 8 auth)
-RUN docker-php-ext-install pdo pdo_mysql
+# Apache must run exactly ONE MPM; mod_php needs prefork.
+# (Some base-image variants ship a second MPM enabled, which
+# crashes Apache with "More than one MPM loaded".)
+RUN a2dismod mpm_event mpm_worker 2>/dev/null || true; \
+    a2enmod mpm_prefork 2>/dev/null || true; \
+    docker-php-ext-install pdo pdo_mysql
 
 COPY . /var/www/html/
 
