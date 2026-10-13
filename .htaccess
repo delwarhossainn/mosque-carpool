@@ -1,0 +1,8 @@
+# Pass the Authorization header through to PHP.
+# Without this, Apache strips "Authorization: Bearer ..." and every
+# logged-in API request looks anonymous ("Not signed in").
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%1]
+</IfModule>

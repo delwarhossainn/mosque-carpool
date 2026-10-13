@@ -42,6 +42,10 @@ function fail(string $msg, int $code = 400): void {
 function auth_user(): ?array {
     $token = null;
     $h = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    if (!$h && function_exists('getallheaders')) {
+        $ah = getallheaders();
+        $h = $ah['Authorization'] ?? $ah['authorization'] ?? '';
+    }
     if (preg_match('/Bearer\s+(\S+)/i', $h, $m)) $token = $m[1];
     if (!$token) $token = body()['token'] ?? $_GET['token'] ?? null;
     if (!$token || strlen($token) !== 64) return null;
