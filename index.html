@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mosque Carpool — Winnipeg</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>🕌 Mosque <span>Carpool</span></h1>
+    <button class="bell" id="bellBtn" onclick="show('notifs')">🔔<span class="badge hidden" id="bellBadge">0</span></button>
+  </header>
+  <main>
+    <div class="quote" id="quoteBox"></div>
+
+    <!-- AUTH -->
+    <section class="screen" id="s-auth">
+      <div class="card">
+        <h2 id="authTitle">Sign in</h2>
+        <div id="signupFields" class="hidden">
+          <label>Full name</label><input id="su_name" placeholder="Your name">
+        </div>
+        <label>Email</label><input id="email" type="email" placeholder="you@email.com">
+        <label>Password</label><input id="pw" type="password" placeholder="••••••••">
+        <div id="signupFields2" class="hidden">
+          <label>I am a</label>
+          <select id="su_gender"><option value="male">Brother</option><option value="female">Sister</option></select>
+          <label style="margin-top:14px"><input type="checkbox" id="su_car" style="width:auto"> I have a car and want to give rides</label>
+          <div id="carBox" class="hidden">
+            <label>Car details (e.g. White Honda Civic)</label><input id="su_cardet" placeholder="Car details">
+          </div>
+        </div>
+        <button class="btn" id="authBtn" onclick="doAuth()">Sign in</button>
+        <div class="center"><button class="link" id="authSwitch" onclick="toggleAuth()">New here? Create an account</button></div>
+        <p class="small center">Brothers are matched with brothers, sisters with sisters.</p>
+      </div>
+    </section>
+
+    <!-- RIDER HOME -->
+    <section class="screen" id="s-rider">
+      <div class="card">
+        <h2>Need a ride to the mosque? 🚗</h2>
+        <p>Choose your mosque. The nearest online driver going there will get your request. You won't see any driver until one accepts.</p>
+        <label>Mosque</label><select id="r_mosque"></select>
+        <label>Note for driver (optional)</label><input id="r_note" placeholder="e.g. Blue house, corner of...">
+        <button class="btn gold" onclick="requestRide()">Request ride</button>
+      </div>
+      <div class="card">
+        <h2>Safety first</h2>
+        <p>• Share your trip with family — they see your driver &amp; pickup code.<br>
+           • Always confirm the 4-digit pickup code before getting in.<br>
+           • Only verified community members can drive.</p>
+      </div>
+    </section>
+
+    <!-- RIDER WAITING -->
+    <section class="screen" id="s-waiting">
+      <div class="card center">
+        <h2 class="pulse">🔎 Looking for a driver…</h2>
+        <p id="w_info">Your request was sent to nearby drivers.</p>
+        <button class="btn danger" onclick="cancelRide()">Cancel request</button>
+      </div>
+    </section>
+
+    <!-- RIDER ACCEPTED -->
+    <section class="screen" id="s-racc">
+      <div class="card">
+        <h2>✅ Driver accepted!</h2>
+        <div class="meta"><span>Driver</span><b id="ra_name"></b></div>
+        <div class="meta"><span>Car</span><b id="ra_car"></b></div>
+        <div class="meta"><span>ETA</span><b id="ra_eta"></b></div>
+        <div class="meta"><span>Mosque</span><b id="ra_mosque"></b></div>
+        <p>Ask your driver for this pickup code before getting in:</p>
+        <div class="code" id="ra_code"></div>
+        <a class="btn secondary" id="ra_maps" target="_blank" style="text-align:center;text-decoration:none">Open route in Maps</a>
+      </div>
+    </section>
+
+    <!-- DRIVER HOME -->
+    <section class="screen" id="s-driver">
+      <div class="card online-toggle">
+        <h2>Driver mode</h2>
+        <p id="d_status">You are offline.</p>
+        <button class="big-toggle" id="goBtn" onclick="toggleOnline()">GO<br>ONLINE</button>
+        <div id="d_mosqueBox" class="hidden">
+          <label>Which mosque are you driving to?</label><select id="d_mosque"></select>
+        </div>
+      </div>
+      <div id="d_queue"></div>
+    </section>
+
+    <!-- DRIVER TRIP -->
+    <section class="screen" id="s-dtrip">
+      <div class="card">
+        <h2>🧭 Active trip</h2>
+        <div class="meta"><span>Rider</span><b id="dt_name"></b></div>
+        <div class="meta"><span>Mosque</span><b id="dt_mosque"></b></div>
+        <p>Ask the rider to confirm this pickup code:</p>
+        <div class="code" id="dt_code"></div>
+        <a class="btn secondary" id="dt_maps" target="_blank" style="text-align:center;text-decoration:none">Navigate to pickup</a>
+        <button class="btn" onclick="completeTrip()">Complete trip ✅</button>
+      </div>
+    </section>
+
+    <!-- NOTIFICATIONS -->
+    <section class="screen" id="s-notifs">
+      <div class="card"><h2>Notifications</h2><div id="notifList"></div></div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="screen" id="s-profile">
+      <div class="card">
+        <h2 id="p_name"></h2>
+        <div class="meta"><span>Email</span><b id="p_email"></b></div>
+        <div class="meta"><span>Driver</span><b id="p_car"></b></div>
+        <button class="btn danger" onclick="doLogout()">Sign out</button>
+      </div>
+    </section>
+  </main>
+  <nav id="tabbar" class="hidden">
+    <button id="tab-rider" onclick="goHome()"><span class="i">🚗</span>Ride</button>
+    <button id="tab-driver" onclick="show('driver')" class="hidden"><span class="i">🛻</span>Drive</button>
+    <button onclick="show('notifs')"><span class="i">🔔</span>Alerts</button>
+    <button onclick="show('profile')"><span class="i">👤</span>Profile</button>
+  </nav>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
