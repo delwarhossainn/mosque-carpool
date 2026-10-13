@@ -1,283 +1,511 @@
-/* Mosque Carpool — frontend (vanilla JS, mobile-first) */
-const S = {
-  token: localStorage.getItem('mc_token'),
-  user: null, mosques: [], mode: 'login',
-  poll: null, online: false, quoteTimer: null,
-};
-const FALLBACK = { lat: 49.8951, lng: -97.1384 }; // downtown Winnipeg
+/* Mosque Carpool — frontend wired to the PHP/MySQL backend.
+   Same look and flow as the original prototype; every action below
+   talks to api/*.php instead of simulated data. */
+'use strict';
 
-const QUOTES = [
-  ["Whoever relieves a believer's distress of the distressful aspects of this world, Allah will rescue him from a difficulty of the difficulties of the Hereafter.", "Sahih Muslim"],
-  ["The best of people are those who are most beneficial to others.", "Hadith"],
-  ["Want to give a brother a ride to the mosque? Go online!", "Mosque Carpool"],
-  ["A sister helping a sister to Fajr — what better deed on a cold Winnipeg morning?", "Mosque Carpool"],
-  ["The most beloved deeds to Allah are the most consistent, even if small.", "Sahih al-Bukhari"],
-  ["Whoever guides someone to goodness will have a reward like the one who did it.", "Sahih Muslim"],
+/* ---------- tiny helpers (kept from the original) ---------- */
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+function toast(msg){
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast.t);
+  toast.t = setTimeout(()=>el.classList.remove('show'), 2600);
+}
+function showScreen(name){
+  $$('.screen').forEach(x=>x.classList.toggle('active', x.dataset.screen===name));
+  $$('.nav-btn').forEach(x=>x.classList.toggle('active', x.dataset.go===name));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function choiceGroup(id, cb){
+  const root = $(id);
+  if(!root) return;
+  root.addEventListener('click', e=>{
+    const b = e.target.closest('.choice');
+    if(!b) return;
+    e.preventDefault();
+    [...root.children].forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected');
+    cb && cb(b.dataset.value);
+  });
+}
+function selectedValue(id){
+  return $(id+' .selected')?.dataset.value || null;
+}
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- state ---------- */
+const state = {
+  token: localStorage.getItem('mc_token') || null,
+  user: null,
+  mosques: [],
+  riderCoords: null,
+  riderPoll: null,
+  driverPoll: null,
+  driverOnline: false,
+  activeRequestId: null,
+  pendingAction: null,
+};
+
+/* Fallback mosque directory (DB ids 1..14, seed order) if the API is unreachable. */
+const FALLBACK_MOSQUES = [
+  {id:1,  label:'Manitoba Islamic Association — Grand Mosque', address:'2445 Waverley St', lat:49.7914428, lng:-97.1749375},
+  {id:2,  label:'Winnipeg Central Mosque', address:'715 Ellice Ave', lat:49.8932488, lng:-97.1644922},
+  {id:3,  label:'Salam Masjid', address:'294 Burrows Ave', lat:49.9156197, lng:-97.1348114},
+  {id:4,  label:'Masjid Bilal — Winnipeg Islamic Centre', address:'33 Warnock St', lat:49.9137890, lng:-97.1677903},
+  {id:5,  label:'ICNA Centre & Mosque', address:"426 St Anne's Rd", lat:49.8459557, lng:-97.0976442},
+  {id:6,  label:'Pakistan Centre Masjid', address:'348 Ross Ave', lat:49.9018270, lng:-97.1424600},
+  {id:7,  label:'MIA Connections', address:'406 Edmonton St', lat:49.8960213, lng:-97.1495499},
+  {id:8,  label:'University of Winnipeg Prayer Space', address:'Graham Hall, 515 Portage Ave', lat:49.8905686, lng:-97.1532053},
+  {id:9,  label:'Pioneer Mosque', address:'247 Hazelwood Ave', lat:49.8266900, lng:-97.1013800},
+  {id:10, label:'Madinah Masjid', address:'431C Thames Ave', lat:49.9090100, lng:-97.1019800},
+  {id:11, label:'Faizan-e-Madina Winnipeg', address:"585 St Anne's Rd", lat:49.8337000, lng:-97.0897000},
+  {id:12, label:'Islamic Educational Foundation', address:'731 Wellington Ave', lat:49.9003400, lng:-97.1649600},
+  {id:13, label:'Jamia Masjid Abobakar Siddique & Community Centre', address:'794 Ellice Ave', lat:49.8930000, lng:-97.1678900},
+  {id:14, label:'Yaseen Centre of Manitoba', address:'746 Ellice Ave', lat:49.8930030, lng:-97.1655930},
 ];
 
-async function api(path, data) {
-  const res = await fetch('api/' + path, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json',
-      ...(S.token ? { 'Authorization': 'Bearer ' + S.token } : {}) },
-    body: JSON.stringify(data || {}),
+/* ---------- API ---------- */
+async function api(path, opts={}){
+  const headers = {'Content-Type':'application/json'};
+  if(state.token) headers['Authorization'] = 'Bearer '+state.token;
+  const res = await fetch('api/'+path, {
+    method: opts.method || 'GET',
+    headers,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
-  const j = await res.json().catch(() => ({ ok: false, error: 'Server error' }));
-  if (!j.ok && (res.status === 401)) { doLogout(true); }
-  return j;
+  const data = await res.json().catch(()=>({ok:false, error:'Network error'}));
+  if(!data.ok) throw new Error(data.error || 'Request failed');
+  return data;
 }
-const $ = id => document.getElementById(id);
-
-function show(id) {
-  stopPoll();
-  document.querySelectorAll('.screen').forEach(e => e.classList.remove('active'));
-  $('s-' + id).classList.add('active');
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  if (id === 'notifs') loadNotifs();
-  if (id === 'profile') renderProfile();
-  window.scrollTo(0, 0);
-}
-
-function stopPoll() { if (S.poll) { clearInterval(S.poll); S.poll = null; } }
-
-function rotateQuote() {
-  const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
-  $('quoteBox').innerHTML = `"${q[0]}"<b>— ${q[1]}</b>`;
+function mosqueById(id){ return state.mosques.find(m=>m.id===+id); }
+function directionsUrl(lat, lng){
+  return 'https://www.google.com/maps/dir/?api=1&destination='+lat+','+lng;
 }
 
 /* ---------- auth ---------- */
-function toggleAuth() {
-  S.mode = S.mode === 'login' ? 'signup' : 'login';
-  const su = S.mode === 'signup';
-  $('authTitle').textContent = su ? 'Create account' : 'Sign in';
-  $('authBtn').textContent = su ? 'Sign up' : 'Sign in';
-  $('authSwitch').textContent = su ? 'Have an account? Sign in' : 'New here? Create an account';
-  $('signupFields').classList.toggle('hidden', !su);
-  $('signupFields2').classList.toggle('hidden', !su);
+function setSession(token, user){
+  state.token = token;
+  state.user = user;
+  if(token) localStorage.setItem('mc_token', token);
+  else localStorage.removeItem('mc_token');
+  $('#pageTitle').textContent = user ? ('Salaam, '+user.name.split(' ')[0]+'.') : 'Salaam, neighbour.';
 }
-$('su_car')?.addEventListener('change', e => $('carBox').classList.toggle('hidden', !e.target.checked));
-
-async function doAuth() {
-  const email = $('email').value.trim(), pw = $('pw').value;
-  if (S.mode === 'signup') {
-    const r = await api('signup.php', {
-      name: $('su_name').value.trim(), email, password: pw,
-      gender: $('su_gender').value,
-      has_car: $('su_car').checked ? 1 : 0,
-      car_details: $('su_cardet').value.trim(),
-    });
-    if (!r.ok) return alert(r.error);
-    S.token = r.token; localStorage.setItem('mc_token', r.token);
-    enter(r.user);
-  } else {
-    const r = await api('login.php', { email, password: pw });
-    if (!r.ok) return alert(r.error);
-    S.token = r.token; localStorage.setItem('mc_token', r.token);
-    enter(r.user);
+function openAuth(tab){
+  $('#authForms').hidden = false;
+  $('#accountPane').hidden = true;
+  $('#authTitle').textContent = 'Welcome';
+  setAuthTab(tab || 'signin');
+  $('#authDialog').showModal();
+}
+function setAuthTab(tab){
+  $$('#authTabs .choice').forEach(x=>x.classList.toggle('selected', x.dataset.value===tab));
+  $('#signinPane').hidden = tab!=='signin';
+  $('#signupPane').hidden = tab!=='signup';
+}
+function openAccount(){
+  $('#authForms').hidden = true;
+  $('#accountPane').hidden = false;
+  $('#authTitle').textContent = 'Your account';
+  const u = state.user;
+  $('#accName').textContent = u.name;
+  $('#accMeta').textContent = u.email+' · '+(u.gender==='female'?'Sister':'Brother')+(u.has_car?' · Driver':' · Rider');
+  $('#authDialog').showModal();
+}
+function requireAuth(action){
+  if(state.user) return true;
+  state.pendingAction = action || null;
+  openAuth('signin');
+  return false;
+}
+function afterAuth(){
+  if(state.pendingAction){
+    const a = state.pendingAction;
+    state.pendingAction = null;
+    goAction(a);
   }
 }
 
-async function doLogout(silent) {
-  try { if (S.token) await api('logout.php', {}); } catch (e) {}
-  S.token = null; S.user = null; S.online = false;
-  localStorage.removeItem('mc_token'); stopPoll();
-  $('tabbar').classList.add('hidden');
-  if (!silent) { toggleReset(); show('auth'); }
+async function doLogin(){
+  const email = $('#loginEmail').value.trim();
+  const password = $('#loginPassword').value;
+  if(!email || !password){ toast('Enter your email and password.'); return; }
+  try{
+    const d = await api('login.php', {method:'POST', body:{email, password}});
+    setSession(d.token, d.user);
+    $('#authDialog').close();
+    toast('Welcome back, '+d.user.name.split(' ')[0]+'.');
+    syncDriverUI(d.user);
+    afterAuth();
+  }catch(e){ toast(e.message); }
 }
-function toggleReset() {
-  if (S.mode === 'signup') toggleAuth();
-  $('email').value = ''; $('pw').value = '';
+async function doSignup(){
+  const name = $('#suName').value.trim();
+  const email = $('#suEmail').value.trim();
+  const password = $('#suPassword').value;
+  const gender = selectedValue('#genderChoice');
+  const car = selectedValue('#carChoice');
+  if(!name || !email || !password || !gender || !car){ toast('Complete each field to continue.'); return; }
+  if(password.length < 6){ toast('Password must be at least 6 characters.'); return; }
+  const vehicle = $('#vehicle').value.trim();
+  const plate = $('#plate').value.trim();
+  const car_details = [vehicle, plate ? ('Plate ending '+plate) : ''].filter(Boolean).join(' · ');
+  try{
+    const d = await api('signup.php', {method:'POST', body:{
+      name, email, password, gender,
+      has_car: car==='yes' ? 1 : 0,
+      car_details,
+    }});
+    setSession(d.token, d.user);
+    $('#authDialog').close();
+    toast('Account created. Salaam, '+d.user.name.split(' ')[0]+'!');
+    afterAuth();
+  }catch(e){ toast(e.message); }
+}
+async function doLogout(){
+  try{ await api('logout.php', {method:'POST'}); }catch(e){}
+  stopAllPolling();
+  setSession(null, null);
+  resetRideUI();
+  setDriverOfflineUI();
+  $('#authDialog').close();
+  toast('Signed out.');
 }
 
-async function enter(user) {
-  S.user = user;
-  const r = await api('mosques.php', {});
-  S.mosques = r.ok ? r.mosques : [];
-  const opts = S.mosques.map(m =>
-    `<option value="${m.id}">${m.name} — ${m.address}</option>`).join('');
-  $('r_mosque').innerHTML = opts; $('d_mosque').innerHTML = opts;
-  $('tabbar').classList.remove('hidden');
-  $('tab-driver').classList.toggle('hidden', !user.has_car);
-  rotateQuote();
-  if (S.quoteTimer) clearInterval(S.quoteTimer);
-  S.quoteTimer = setInterval(rotateQuote, 12000);
-  refreshBadge();
-  goHome();
-}
-
-async function refreshBadge() {
-  const r = await api('me.php', {});
-  if (r.ok) {
-    S.user = r.user;
-    const n = r.user.unread_notifications;
-    $('bellBadge').textContent = n;
-    $('bellBadge').classList.toggle('hidden', !n);
+/* ---------- navigation (original behaviour) ---------- */
+function goAction(action){
+  if(!requireAuth(action)) return;
+  if(action==='request') showScreen('ride');
+  if(action==='drive'){
+    showScreen('drive');
+    if(!state.user.has_car) toast('Rider-only profiles cannot receive ride requests.');
   }
 }
+$$('[data-go]').forEach(b=>b.addEventListener('click', ()=>showScreen(b.dataset.go)));
+$$('[data-action]').forEach(b=>b.addEventListener('click', ()=>goAction(b.dataset.action)));
+$('#profileBtn').addEventListener('click', ()=>{ state.user ? openAccount() : openAuth('signin'); });
+$$('[data-close]').forEach(b=>b.addEventListener('click', ()=>$('#authDialog').close()));
 
-function goHome() {
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  $('tab-rider').classList.add('active');
-  show('rider');
+/* ---------- mosques + map ---------- */
+async function loadMosques(){
+  try{
+    const d = await api('mosques.php');
+    state.mosques = d.mosques.map(m=>({id:+m.id, label:m.name, address:m.address||'', lat:+m.lat, lng:+m.lng}));
+  }catch(e){
+    state.mosques = FALLBACK_MOSQUES;
+  }
+  const opts = state.mosques.map(m=>`<option value="${m.id}">${esc(m.label)}</option>`).join('');
+  $('#rideMosque').innerHTML = opts;
+  $('#driveMosque').innerHTML = opts;
+  updateDirections();
+  mountMap();
 }
-
-/* ---------- location ---------- */
-function getPos() {
-  return new Promise(res => {
-    if (!navigator.geolocation) return res(FALLBACK);
-    navigator.geolocation.getCurrentPosition(
-      p => res({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => res(FALLBACK), { timeout: 8000 });
+function updateDirections(){
+  const m = mosqueById($('#rideMosque').value);
+  const a = $('#rideDirections');
+  if(m){ a.href = directionsUrl(m.lat, m.lng); a.style.display='inline-flex'; }
+  else { a.href='#'; a.style.display='none'; }
+}
+function mapFallback(){
+  const box = $('#homeMap');
+  box.innerHTML = '<div class="map-fallback"><div><strong>Map unavailable</strong><p>Choose a mosque from the destination list below and open directions in your maps app.</p></div></div>';
+}
+function mountMap(){
+  const box = $('#homeMap');
+  // Mosque directory rows (kept from the original, now with live data).
+  const rows = state.mosques.map((m,i)=>{
+    const r = document.createElement('div');
+    r.className = 'mosque-row';
+    const url = directionsUrl(m.lat, m.lng);
+    r.innerHTML = `<span class="num">${i+1}</span><div class="info"><h3>${esc(m.label)}</h3><p>${esc(m.address)}, Winnipeg</p></div><a href="${url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Directions</a>`;
+    return r;
   });
+  const list = document.createElement('div');
+  list.className = 'mosque-list';
+  rows.forEach(r=>list.appendChild(r));
+  box.parentElement.parentElement.appendChild(list);
+
+  if(!window.maplibregl){ mapFallback(); return; }
+  try{
+    const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+    const map = new maplibregl.Map({
+      container: box,
+      style: dark ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+                  : 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+      center: [-97.14, 49.895],
+      zoom: 10.5,
+    });
+    map.addControl(new maplibregl.NavigationControl(), 'top-right');
+    state.mosques.forEach((m,i)=>{
+      const el = document.createElement('div');
+      el.className = 'mosque-marker';
+      el.textContent = String(i+1);
+      new maplibregl.Marker({element: el})
+        .setLngLat([m.lng, m.lat])
+        .setPopup(new maplibregl.Popup({offset: 20}).setHTML(`<strong>${esc(m.label)}</strong><br>${esc(m.address)}`))
+        .addTo(map);
+    });
+    rows.forEach((r,i)=>{
+      r.style.cursor = 'pointer';
+      r.addEventListener('click', ()=>map.flyTo({center:[state.mosques[i].lng, state.mosques[i].lat], zoom:14}));
+    });
+  }catch(e){ mapFallback(); }
 }
 
 /* ---------- rider flow ---------- */
-async function requestRide() {
-  const mid = parseInt($('r_mosque').value);
-  const pos = await getPos();
-  const r = await api('request_ride.php', {
-    mosque_id: mid, lat: pos.lat, lng: pos.lng, note: $('r_note').value.trim(),
+function getPosition(){
+  return new Promise((resolve, reject)=>{
+    if(!navigator.geolocation) return reject(new Error('no geo'));
+    navigator.geolocation.getCurrentPosition(resolve, reject, {enableHighAccuracy:false, timeout:8000});
   });
-  if (!r.ok) return alert(r.error);
-  $('w_info').textContent = r.drivers_online > 0
-    ? `${r.drivers_online} driver${r.drivers_online > 1 ? 's' : ''} online for ${r.mosque} — hang tight.`
-    : `No drivers online for ${r.mosque} right now — your request is waiting for one.`;
-  show('waiting');
-  stopPoll();
-  S.poll = setInterval(pollRiderTrip, 8000);
+}
+$('#locateBtn').addEventListener('click', async ()=>{
+  $('#locationStatus').textContent = 'Requesting location permission…';
+  try{
+    const pos = await getPosition();
+    state.riderCoords = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+    $('#pickup').value = 'Current location';
+    $('#locationStatus').textContent = 'Location ready. It stays hidden until a driver accepts.';
+    toast('Current location added.');
+  }catch(e){
+    $('#locationStatus').textContent = 'Location was not shared. Enter an intersection or area instead.';
+  }
+});
+$('#rideMosque').addEventListener('change', updateDirections);
+
+$('#sendRequest').addEventListener('click', async ()=>{
+  if(!requireAuth('request')) return;
+  const pickupText = $('#pickup').value.trim();
+  if(!pickupText && !state.riderCoords){ toast('Add a pickup area or use your current location.'); return; }
+  const mosqueId = +$('#rideMosque').value;
+  const win = selectedValue('#rideWindow') || 'Fajr';
+  const seats = $('#riders').value;
+  const note = [pickupText, win+' window', seats].filter(Boolean).join(' · ');
+  try{
+    const d = await api('request_ride.php', {method:'POST', body:{
+      mosque_id: mosqueId,
+      lat: state.riderCoords ? state.riderCoords.lat : 0,
+      lng: state.riderCoords ? state.riderCoords.lng : 0,
+      note,
+    }});
+    state.activeRequestId = d.request_id;
+    $('#rideEmpty').hidden = true;
+    $('#acceptedState').hidden = true;
+    $('#matchingState').hidden = false;
+    if(d.drivers_online === 0) toast('Request sent — no drivers online for this mosque yet.');
+    startRiderPoll();
+  }catch(e){ toast(e.message); }
+});
+
+function startRiderPoll(){
+  stopRiderPoll();
+  state.riderPoll = setInterval(pollRiderTrip, 4000);
   pollRiderTrip();
 }
+function stopRiderPoll(){ clearInterval(state.riderPoll); state.riderPoll = null; }
 
-async function pollRiderTrip() {
-  const r = await api('my_trip.php', {});
-  if (!r.ok || !r.trip) { goHome(); return; }
-  if (r.trip.role === 'rider' && r.trip.status === 'accepted') {
-    stopPoll();
-    $('ra_name').textContent = r.trip.driver_name;
-    $('ra_car').textContent = r.trip.car_details || '—';
-    $('ra_eta').textContent = '~' + r.trip.eta_min + ' min';
-    $('ra_mosque').textContent = r.trip.mosque_name;
-    $('ra_code').textContent = r.trip.pickup_code;
-    $('ra_maps').href = r.trip.maps_url;
-    show('racc');
-    // keep watching until the driver completes the trip
-    S.poll = setInterval(async () => {
-      const t = await api('my_trip.php', {});
-      if (t.ok && !t.trip) { stopPoll(); alert('Trip completed. JazakAllah khair! 🤲'); goHome(); }
-    }, 15000);
-  }
+async function pollRiderTrip(){
+  try{
+    const d = await api('my_trip.php');
+    const t = d.trip;
+    if(!t || t.role!=='rider'){ stopRiderPoll(); resetRideUI(); return; }
+    if(t.status==='accepted'){
+      stopRiderPoll();
+      renderAccepted(t);
+    }
+  }catch(e){ /* transient — keep polling */ }
 }
-
-async function cancelRide() {
-  const t = await api('my_trip.php', {});
-  if (t.ok && t.trip && t.trip.role === 'rider') {
-    await api('cancel_request.php', { request_id: t.trip.request_id });
-  }
-  goHome();
+function initials(name){ return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+function renderAccepted(t){
+  $('#matchingState').hidden = true;
+  $('#rideEmpty').hidden = true;
+  const c = $('#acceptedContent');
+  c.innerHTML = `
+    <p class="eyebrow">Driver accepted</p><h2>Your ride is on the way</h2>
+    <div class="driver-card card">
+      <div class="driver-head"><div class="avatar">${esc(initials(t.driver_name))}</div><div><h3 style="margin:0">${esc(t.driver_name)}</h3><span class="verified">Same-gender match</span></div></div>
+      <div class="request-meta">
+        ${t.car_details?`<span class="chip">${esc(t.car_details)}</span>`:''}
+        <span class="chip">About ${t.eta_min} min</span>
+      </div>
+      <div class="trip-code"><span>Confirm before boarding</span><strong>${esc(t.pickup_code)}</strong><small>One-time pickup code</small></div>
+      ${t.maps_url?`<a class="btn secondary full" style="margin-top:14px" href="${esc(t.maps_url)}" target="_blank" rel="noopener">Open route in maps</a>`:''}
+    </div>`;
+  $('#acceptedState').hidden = false;
+  toast('A driver accepted your ride!');
+}
+$('#cancelRequest').addEventListener('click', async ()=>{
+  if(!state.activeRequestId){ resetRideUI(); return; }
+  try{ await api('cancel_request.php', {method:'POST', body:{request_id: state.activeRequestId}}); }
+  catch(e){ /* fall through */ }
+  state.activeRequestId = null;
+  stopRiderPoll();
+  resetRideUI();
+  toast('Request cancelled.');
+});
+$('#resetRide').addEventListener('click', ()=>{ state.activeRequestId = null; stopRiderPoll(); resetRideUI(); });
+function resetRideUI(){
+  $('#rideEmpty').hidden = false;
+  $('#matchingState').hidden = true;
+  $('#acceptedState').hidden = true;
 }
 
 /* ---------- driver flow ---------- */
-async function toggleOnline() {
-  if (!S.online) {
-    const mid = parseInt($('d_mosque').value);
-    if (!mid) return alert('Choose a mosque first.');
-    const pos = await getPos();
-    const r = await api('driver_status.php', { online: 1, mosque_id: mid, lat: pos.lat, lng: pos.lng });
-    if (!r.ok) return alert(r.error);
-    S.online = true;
-    $('goBtn').classList.add('on'); $('goBtn').innerHTML = 'ONLINE<br>🟢';
-    $('d_status').textContent = 'You are online — riders can now request you.';
-    $('d_mosqueBox').classList.add('hidden');
-    stopPoll();
-    S.poll = setInterval(pollDriver, 10000);
-    pollDriver();
-  } else {
-    await api('driver_status.php', { online: 0 });
-    S.online = false;
-    $('goBtn').classList.remove('on'); $('goBtn').innerHTML = 'GO<br>ONLINE';
-    $('d_status').textContent = 'You are offline.';
-    $('d_mosqueBox').classList.remove('hidden');
-    $('d_queue').innerHTML = '';
-    stopPoll();
+$('#goOnline').addEventListener('click', async ()=>{
+  if(!requireAuth('drive')) return;
+  if(!state.user.has_car){ toast('Rider-only profiles cannot receive ride requests.'); return; }
+  const mosqueId = +$('#driveMosque').value;
+  const m = mosqueById(mosqueId);
+  let lat = 0, lng = 0;
+  try{
+    const pos = await getPosition();
+    lat = pos.coords.latitude; lng = pos.coords.longitude;
+  }catch(e){
+    if(m){ lat = m.lat; lng = m.lng; } // fall back to the destination mosque
+  }
+  try{
+    await api('driver_status.php', {method:'POST', body:{online:1, mosque_id:mosqueId, lat, lng}});
+    state.driverOnline = true;
+    $('#driverSetup').hidden = true;
+    $('#onlinePanel').hidden = false;
+    $('#statusDot').classList.add('online');
+    $('#driverStatusText').textContent = 'Online for one trip';
+    toast('You are online for '+(m ? m.label : 'your mosque')+'.');
+    startDriverPoll();
+  }catch(e){ toast(e.message); }
+});
+
+function startDriverPoll(){
+  stopDriverPoll();
+  state.driverPoll = setInterval(pollDriverRequests, 5000);
+  pollDriverRequests();
+}
+function stopDriverPoll(){ clearInterval(state.driverPoll); state.driverPoll = null; }
+
+async function pollDriverRequests(){
+  try{
+    const d = await api('driver_requests.php');
+    renderIncoming(d.requests || []);
+  }catch(e){
+    if(/Go online first/.test(e.message)){ setDriverOfflineUI(); }
   }
 }
-
-async function pollDriver() {
-  // first: do I have an accepted trip?
-  const t = await api('my_trip.php', {});
-  if (t.ok && t.trip && t.trip.role === 'driver') { stopPoll(); renderDriverTrip(t.trip); return; }
-  const r = await api('driver_requests.php', {});
-  if (!r.ok) return;
-  const q = $('d_queue');
-  if (!r.requests.length) {
-    q.innerHTML = `<div class="card"><p class="center">No requests right now. Stay online — riders will appear here.</p></div>`;
+function renderIncoming(reqs){
+  const box = $('#incomingList');
+  if(!reqs.length){
+    box.innerHTML = '<div class="request-card"><p class="eyebrow">Waiting</p><h3>No requests yet</h3><p style="color:var(--muted)">Matching same-gender requests for your mosque will appear here.</p></div>';
     return;
   }
-  q.innerHTML = '<div class="card"><h2>Incoming requests (' + r.requests.length + ')</h2></div>' +
-    r.requests.map(x => `
-    <div class="card req">
-      <div class="meta"><span>Rider</span><b>${esc(x.rider_name)}</b></div>
-      <div class="meta"><span>Distance</span><b class="dist">${x.dist_km} km away</b></div>
-      ${x.note ? `<p>"${esc(x.note)}"</p>` : ''}
-      <div class="row2">
-        <button class="btn" onclick="respondReq(${x.id},1)">Accept ✅</button>
-        <button class="btn secondary" onclick="respondReq(${x.id},0)">Decline</button>
-      </div>
-    </div>`).join('');
+  box.innerHTML = '';
+  reqs.forEach(r=>{
+    const card = document.createElement('div');
+    card.className = 'request-card';
+    card.innerHTML = `
+      <p class="eyebrow">Nearby request</p>
+      <h3>${r.dist_km} km away</h3>
+      <p style="color:var(--muted)">${r.note ? esc(r.note) : 'Pickup details unlock after acceptance.'}</p>
+      <div class="request-meta"><span class="chip">Same-gender match</span><span class="chip">Phone verified</span></div>
+      <div style="display:flex;gap:9px">
+        <button class="btn primary" data-accept="${r.id}">Accept</button>
+        <button class="btn danger" data-decline="${r.id}">Decline</button>
+      </div>`;
+    box.appendChild(card);
+  });
+  box.querySelectorAll('[data-accept]').forEach(b=>b.addEventListener('click', ()=>respondTo(b.dataset.accept, true)));
+  box.querySelectorAll('[data-decline]').forEach(b=>b.addEventListener('click', ()=>respondTo(b.dataset.decline, false)));
 }
-
-async function respondReq(id, accept) {
-  const r = await api('respond_request.php', { request_id: id, accept });
-  if (!r.ok) { alert(r.error); pollDriver(); return; }
-  if (accept) {
-    const t = await api('my_trip.php', {});
-    if (t.ok && t.trip) { stopPoll(); renderDriverTrip(t.trip); }
-  } else pollDriver();
+async function respondTo(requestId, accept){
+  try{
+    const d = await api('respond_request.php', {method:'POST', body:{request_id:+requestId, accept: accept?1:0}});
+    if(accept){
+      const t = await api('my_trip.php');
+      renderDriverTrip(t.trip, d.pickup_code);
+      toast('Request accepted. Pickup details unlocked.');
+    }else{
+      toast('Request declined.');
+      pollDriverRequests();
+    }
+  }catch(e){ toast(e.message); }
 }
-
-function renderDriverTrip(t) {
-  $('dt_name').textContent = t.rider_name;
-  $('dt_mosque').textContent = t.mosque_name;
-  $('dt_code').textContent = t.pickup_code;
-  $('dt_maps').href = t.maps_url;
-  $('dt_maps').dataset.req = t.request_id;
-  show('dtrip');
+function renderDriverTrip(t, code){
+  const box = $('#incomingList');
+  box.innerHTML = `
+    <div class="request-card">
+      <p class="eyebrow">Accepted</p><h3>Meet your rider</h3>
+      <p>Rider: <strong>${esc(t.rider_name)}</strong></p>
+      ${t.note?`<p style="color:var(--muted)">${esc(t.note)}</p>`:''}
+      <div class="trip-code"><span>Ask the rider to confirm</span><strong>${esc(t.pickup_code || code || '')}</strong><small>One-time pickup code</small></div>
+      ${t.maps_url?`<a class="btn secondary full" style="margin-top:14px" href="${esc(t.maps_url)}" target="_blank" rel="noopener">Open pickup in maps</a>`:''}
+      <button class="btn primary full" style="margin-top:14px" id="completeTrip">Complete trip</button>
+    </div>`;
+  $('#completeTrip').addEventListener('click', async ()=>{
+    try{
+      await api('complete_trip.php', {method:'POST', body:{request_id: t.request_id}});
+      goOffline('Trip completed. JazakAllah khair!');
+    }catch(e){ toast(e.message); }
+  });
 }
-
-async function completeTrip() {
-  const id = parseInt($('dt_maps').dataset.req);
-  const r = await api('complete_trip.php', { request_id: id });
-  if (!r.ok) return alert(r.error);
-  alert('Trip completed. May Allah accept it from you! 🤲');
-  show('driver');
-  stopPoll();
-  S.poll = setInterval(pollDriver, 10000);
-  pollDriver();
+async function goOffline(msg){
+  try{ await api('driver_status.php', {method:'POST', body:{online:0}}); }catch(e){}
+  setDriverOfflineUI();
+  if(msg) toast(msg);
 }
-
-function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-/* ---------- notifications / profile ---------- */
-async function loadNotifs() {
-  const r = await api('notifications.php', {});
-  if (!r.ok) return;
-  $('notifList').innerHTML = r.notifications.length
-    ? r.notifications.map(n => `<div class="meta"><span>${esc(n.created_at.slice(0,16).replace('T',' '))}</span><b>${esc(n.title)}</b></div><p>${esc(n.body)}</p>`).join('')
-    : '<p>No notifications yet.</p>';
-  api('mark_read.php', {}).then(refreshBadge);
+function setDriverOfflineUI(){
+  state.driverOnline = false;
+  stopDriverPoll();
+  $('#driverSetup').hidden = false;
+  $('#onlinePanel').hidden = true;
+  $('#statusDot').classList.remove('online');
+  $('#driverStatusText').textContent = 'You are offline';
 }
+$('#goOffline').addEventListener('click', ()=>goOffline('You are offline.'));
 
-function renderProfile() {
-  $('p_name').textContent = S.user.name;
-  $('p_email').textContent = S.user.email;
-  $('p_car').textContent = S.user.has_car ? ('Yes — ' + (S.user.car_details || 'car registered')) : 'Rider only';
+function syncDriverUI(user){
+  // If the driver was left online in a previous session, reflect it.
+  if(user && user.has_car && user.driver && +user.driver.is_online === 1){
+    state.driverOnline = true;
+    $('#driverSetup').hidden = true;
+    $('#onlinePanel').hidden = false;
+    $('#statusDot').classList.add('online');
+    $('#driverStatusText').textContent = 'Online for one trip';
+    startDriverPoll();
+  }
 }
+function stopAllPolling(){ stopRiderPoll(); stopDriverPoll(); }
+
+/* ---------- auth dialog wiring ---------- */
+choiceGroup('#authTabs', setAuthTab);
+choiceGroup('#genderChoice');
+choiceGroup('#carChoice', v=>{ $('#vehicleFields').hidden = v!=='yes'; });
+choiceGroup('#rideWindow');
+choiceGroup('#driveWindow');
+$('#doLogin').addEventListener('click', doLogin);
+$('#doSignup').addEventListener('click', doSignup);
+$('#doLogout').addEventListener('click', doLogout);
+$('#loginPassword').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+$('#suPassword').addEventListener('keydown', e=>{ if(e.key==='Enter') doSignup(); });
 
 /* ---------- boot ---------- */
-(async function boot() {
-  rotateQuote();
-  if (S.token) {
-    const r = await api('me.php', {});
-    if (r.ok) enter(r.user); else { doLogout(true); show('auth'); }
-  } else show('auth');
+(async function boot(){
+  await loadMosques();
+  if(state.token){
+    try{
+      const d = await api('me.php');
+      setSession(state.token, d.user);
+      syncDriverUI(d.user);
+      // If the rider has an active trip, resume its UI.
+      const t = await api('my_trip.php').catch(()=>null);
+      if(t && t.trip && t.trip.role==='rider'){
+        state.activeRequestId = t.trip.request_id;
+        $('#rideEmpty').hidden = true;
+        if(t.trip.status==='accepted') renderAccepted(t.trip);
+        else { $('#matchingState').hidden = false; startRiderPoll(); }
+      }
+    }catch(e){
+      setSession(null, null); // bad/expired token
+    }
+  }
 })();

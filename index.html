@@ -1,131 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mosque Carpool — Winnipeg</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Mosque Carpool</title>
 </head>
 <body>
-<div id="app">
-  <header>
-    <h1>🕌 Mosque <span>Carpool</span></h1>
-    <button class="bell" id="bellBtn" onclick="show('notifs')">🔔<span class="badge hidden" id="bellBadge">0</span></button>
-  </header>
-  <main>
-    <div class="quote" id="quoteBox"></div>
+  <div class="app">
+    <header class="topbar">
+      <div><p class="eyebrow">Winnipeg</p><h1 id="pageTitle">Salaam, neighbour.</h1></div>
+      <button class="icon-btn" id="profileBtn" aria-label="Account">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.3 3.4-6.5 8-6.5s7.3 2.2 8 6.5"/></svg>
+      </button>
+    </header>
 
-    <!-- AUTH -->
-    <section class="screen" id="s-auth">
-      <div class="card">
-        <h2 id="authTitle">Sign in</h2>
-        <div id="signupFields" class="hidden">
-          <label>Full name</label><input id="su_name" placeholder="Your name">
+    <main>
+      <section class="screen active" data-screen="home">
+        <div class="layout">
+          <article class="hero">
+            <div class="hero-copy">
+              <p class="eyebrow" style="color:inherit;opacity:.72">A ride can be a sadaqah</p>
+              <p class="quote">Going to the masjid? Make room for one more.</p>
+              <p class="sub">Match with a nearby driver headed to the same Winnipeg mosque—without revealing either person's location before the driver accepts.</p>
+            </div>
+            <div class="quick">
+              <button class="btn primary" data-action="request">Request a ride</button>
+              <button class="btn secondary" data-action="drive">Go online to drive</button>
+            </div>
+          </article>
+
+          <div>
+            <div class="section-head" style="margin-top:0"><div><p class="eyebrow">Choose your path</p><h2>What do you need?</h2></div></div>
+            <div class="action-grid">
+              <button class="action-card" data-action="request">
+                <span class="mini-icon"><svg viewBox="0 0 24 24"><path d="M5 16v-5l2-5h10l2 5v5"/><path d="M4 12h16M7 16v2m10-2v2M8 12h.01M16 12h.01"/></svg></span>
+                <strong>Find a ride</strong><p>Select a mosque, choose a prayer window and send one request.</p>
+              </button>
+              <button class="action-card" data-action="drive">
+                <span class="mini-icon"><svg viewBox="0 0 24 24"><path d="M4 17h16M6 17l1.5-8h9L18 17M9 9V6h6v3M7 20h.01M17 20h.01"/></svg></span>
+                <strong>Share your car</strong><p>Go online for one destination and review matching requests nearby.</p>
+              </button>
+            </div>
+          </div>
+
+          <article class="card map-card">
+            <div class="map-shell"><div id="homeMap" class="map" aria-label="Map of Winnipeg mosque destinations"></div></div>
+            <div class="source-line">Destination directory includes resolved mosque records and additional Winnipeg listings. Use “Directions” to verify the final destination in your maps app.</div>
+          </article>
         </div>
-        <label>Email</label><input id="email" type="email" placeholder="you@email.com">
-        <label>Password</label><input id="pw" type="password" placeholder="••••••••">
-        <div id="signupFields2" class="hidden">
-          <label>I am a</label>
-          <select id="su_gender"><option value="male">Brother</option><option value="female">Sister</option></select>
-          <label style="margin-top:14px"><input type="checkbox" id="su_car" style="width:auto"> I have a car and want to give rides</label>
-          <div id="carBox" class="hidden">
-            <label>Car details (e.g. White Honda Civic)</label><input id="su_cardet" placeholder="Car details">
+      </section>
+
+      <section class="screen" data-screen="ride">
+        <div class="page-intro"><p class="eyebrow">Rider</p><h2>Request a ride to the masjid</h2><p>Drivers only see a nearby, same-gender request headed to their selected mosque. Your pickup location stays hidden until one accepts.</p></div>
+        <div id="rideEmpty" class="flow-grid two">
+          <article class="card form-card">
+            <div class="form-group"><label for="pickup">Pickup area</label><div style="display:flex;gap:9px"><input id="pickup" placeholder="Enter an intersection or area"/><button class="btn secondary small" id="locateBtn" type="button">Use location</button></div><p class="helper" id="locationStatus">Your precise location is shared only after a driver accepts.</p></div>
+            <div class="form-group"><label for="rideMosque">Destination mosque</label><select id="rideMosque"></select></div>
+            <div class="form-group"><label>Prayer / departure window</label><div class="choice-grid" id="rideWindow"><button class="choice selected" data-value="Fajr">Fajr</button><button class="choice" data-value="Dhuhr">Dhuhr</button><button class="choice" data-value="Asr">Asr</button><button class="choice" data-value="Maghrib / Isha">Maghrib / Isha</button></div></div>
+            <div class="form-group"><label for="riders">Seats needed</label><select id="riders"><option>1 rider</option><option>2 riders</option><option>3 riders</option></select></div>
+            <div class="notice"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.4 8.2-8 9-4.6-.8-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg><div><strong>Same-gender matching is automatic</strong>Your request is sent only to eligible drivers going to the same mosque.</div></div>
+            <div style="margin-top:18px"><button class="btn primary full" id="sendRequest">Send ride request</button></div>
+          </article>
+          <aside class="card sticky"><p class="eyebrow">Before pickup</p><h3>Use the four-point check</h3><p style="color:var(--muted)">Confirm the driver's name, car, plate ending and one-time pickup code before getting in.</p><a id="rideDirections" class="btn secondary full" href="#" target="_blank" rel="noopener">Preview route in maps</a></aside>
+        </div>
+        <article id="matchingState" class="card match-state" hidden>
+          <div class="pulse"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21a9 9 0 1 0-9-9"/><path d="M12 7v5l3 2"/></svg></div>
+          <p class="eyebrow">Request sent</p><h2>Looking for a nearby driver</h2><p style="color:var(--muted);max-width:480px;margin:0 auto 22px">No driver identity or live location is shown until someone reviews and accepts your request.</p>
+          <button class="btn secondary" id="cancelRequest">Cancel request</button>
+        </article>
+        <article id="acceptedState" class="card match-state" hidden>
+          <div id="acceptedContent"></div>
+          <button class="btn ghost" style="margin-top:18px" id="resetRide">Done</button>
+        </article>
+      </section>
+
+      <section class="screen" data-screen="drive">
+        <div class="page-intro"><p class="eyebrow">Driver</p><h2>Share the drive you're already making</h2><p>Choose one mosque and one trip window. Only same-gender requests near your route can reach you.</p></div>
+        <div class="flow-grid two">
+          <article class="card status-card">
+            <div class="status-top"><div><p class="eyebrow">Availability</p><h3 id="driverStatusText">You are offline</h3></div><span class="status-dot" id="statusDot"></span></div>
+            <div id="driverSetup">
+              <div class="form-group" style="margin-top:18px"><label for="driveMosque">I'm going to</label><select id="driveMosque"></select></div>
+              <div class="form-group"><label>Departure window</label><div class="choice-grid" id="driveWindow"><button class="choice selected" data-value="Fajr">Fajr</button><button class="choice" data-value="Dhuhr">Dhuhr</button><button class="choice" data-value="Asr">Asr</button><button class="choice" data-value="Maghrib / Isha">Maghrib / Isha</button></div></div>
+              <div class="form-group"><label for="seatCount">Open seats</label><select id="seatCount"><option>1 seat</option><option selected>2 seats</option><option>3 seats</option><option>4 seats</option></select></div>
+              <button class="btn primary full" id="goOnline">Go online</button>
+              <p class="helper">Online status ends when you go offline or complete this trip.</p>
+            </div>
+            <div id="onlinePanel" hidden>
+              <div class="notice" style="margin-top:18px"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.4 8.2-8 9-4.6-.8-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg><div><strong>You're visible to eligible riders</strong>Only approximate proximity is used until you accept a request.</div></div>
+              <div class="request-list" id="incomingList"></div>
+              <button class="btn ghost full" style="margin-top:14px" id="goOffline">Go offline</button>
+            </div>
+          </article>
+          <aside class="card sticky">
+            <p class="eyebrow">Driver safety</p><div class="safety-item"><span class="mini-icon"><svg viewBox="0 0 24 24"><path d="M8 11V7a4 4 0 0 1 8 0v4M6 17l1.5-8h9L18 17M9 9V6h6v3"/></svg></span><div><h3>Accept before details</h3><p>Pickup location and rider name stay private until you choose to accept.</p></div></div>
+            <div class="safety-item" style="margin-top:18px"><span class="mini-icon"><svg viewBox="0 0 24 24"><path d="M8 11V7a4 4 0 0 1 8 0v4M6 11h12v10H6z"/></svg></span><div><h3>Pickup code</h3><p>Both people confirm a one-time code before the ride starts.</p></div></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="safety">
+        <div class="page-intro"><p class="eyebrow">Trust by design</p><h2>Clear boundaries make generous rides safer</h2><p>These safeguards should be built into every request, not left for riders and drivers to negotiate at the curb.</p></div>
+        <div class="safety-grid">
+          <article class="card safety-item"><span class="mini-icon"><svg viewBox="0 0 24 24"><path d="M8 11V7a4 4 0 0 1 8 0v4M6 11h12v10H6z"/></svg></span><div><h3>Private until accepted</h3><p>No driver map for riders and no precise pickup for drivers before a match is accepted.</p></div></article>
+          <article class="card safety-item"><span class="mini-icon"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.4 8.2-8 9-4.6-.8-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg></span><div><h3>Identity and vehicle checks</h3><p>Phone verification for everyone; licence, insurance and vehicle details for drivers.</p></div></article>
+          <article class="card safety-item"><span class="mini-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.3 3.4-6.5 8-6.5s7.3 2.2 8 6.5s7.3 2.2 8 6.5"/></svg></span><div><h3>Same-gender matching</h3><p>Men receive requests from men; women receive requests from women. Other profiles require support review before matching.</p></div></article>
+          <article class="card safety-item"><span class="mini-icon"><svg viewBox="0 0 24 24"><path d="M7 12l3 3 7-7"/><circle cx="12" cy="12" r="9"/></svg></span><div><h3>One-time pickup check</h3><p>Match the name, vehicle, partial plate and four-digit code before boarding.</p></div></article>
+          <article class="card safety-item"><span class="mini-icon"><svg viewBox="0 0 24 24"><path d="M4 20l4-4m8-8 4-4M9 7l8 8M6 10l8 8"/></svg></span><div><h3>Easy decline and block</h3><p>Either person can decline without explanation. Repeated declines do not reduce access or ranking.</p></div></article>
+          <article class="card safety-item"><span class="mini-icon"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg></span><div><h3>Accessibility notes</h3><p>Riders can request space for a mobility aid or an accessible pickup point before matching.</p></div></article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button class="nav-btn active" data-go="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10h-6v-7H9v7H3z"/></svg><span>Home</span></button>
+    <button class="nav-btn" data-go="ride"><svg viewBox="0 0 24 24"><path d="M5 16v-5l2-5h10l2 5v5"/><path d="M4 12h16M7 16v2m10-2v2"/></svg><span>Ride</span></button>
+    <button class="nav-btn" data-go="drive"><svg viewBox="0 0 24 24"><path d="M4 17h16M6 17l1.5-8h9L18 17M9 9V6h6v3"/></svg><span>Drive</span></button>
+    <button class="nav-btn" data-go="safety"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.4 8.2-8 9-4.6-.8-8-4-8-9V7l8-4z"/></svg><span>Safety</span></button>
+  </nav>
+
+  <dialog id="authDialog">
+    <div class="modal">
+      <div class="modal-head"><h2 id="authTitle">Welcome</h2><button class="close-btn" data-close aria-label="Close">×</button></div>
+      <div class="modal-body">
+        <div id="authForms">
+          <div class="choice-grid" id="authTabs" style="margin-bottom:18px"><button class="choice selected" data-value="signin">Sign in</button><button class="choice" data-value="signup">Create account</button></div>
+          <div id="signinPane">
+            <div class="form-group"><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com"/></div>
+            <div class="form-group"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password"/></div>
+            <div class="modal-actions"><button class="btn primary full" id="doLogin">Sign in</button></div>
+          </div>
+          <div id="signupPane" hidden>
+            <div class="form-group"><label for="suName">First name</label><input id="suName" autocomplete="given-name" placeholder="Your first name"/></div>
+            <div class="form-group"><label for="suEmail">Email</label><input id="suEmail" type="email" autocomplete="email" placeholder="you@example.com"/></div>
+            <div class="form-group"><label for="suPassword">Password</label><input id="suPassword" type="password" autocomplete="new-password" placeholder="At least 6 characters"/></div>
+            <div class="form-group"><label>I identify as</label><div class="choice-grid" id="genderChoice"><button class="choice" data-value="male">Man</button><button class="choice" data-value="female">Woman</button></div></div>
+            <div class="form-group"><label>Can you offer rides?</label><div class="choice-grid" id="carChoice"><button class="choice" data-value="yes">Yes, I have a car</button><button class="choice" data-value="no">No, rider only</button></div></div>
+            <div id="vehicleFields" hidden>
+              <div class="form-group"><label for="vehicle">Vehicle</label><input id="vehicle" placeholder="e.g. Silver Toyota Corolla"/></div>
+              <div class="form-group"><label for="plate">Plate ending</label><input id="plate" maxlength="3" placeholder="Last 2–3 characters"/></div>
+            </div>
+            <div class="notice"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.4 8.2-8 9-4.6-.8-8-4-8-9V7l8-4z"/></svg><div><strong>Your choice controls matching</strong>Men match with men; women match with women. Vehicle documents would be reviewed before a driver can go online.</div></div>
+            <div class="modal-actions"><button class="btn primary full" id="doSignup">Create account</button></div>
           </div>
         </div>
-        <button class="btn" id="authBtn" onclick="doAuth()">Sign in</button>
-        <div class="center"><button class="link" id="authSwitch" onclick="toggleAuth()">New here? Create an account</button></div>
-        <p class="small center">Brothers are matched with brothers, sisters with sisters.</p>
-      </div>
-    </section>
-
-    <!-- RIDER HOME -->
-    <section class="screen" id="s-rider">
-      <div class="card">
-        <h2>Need a ride to the mosque? 🚗</h2>
-        <p>Choose your mosque. The nearest online driver going there will get your request. You won't see any driver until one accepts.</p>
-        <label>Mosque</label><select id="r_mosque"></select>
-        <label>Note for driver (optional)</label><input id="r_note" placeholder="e.g. Blue house, corner of...">
-        <button class="btn gold" onclick="requestRide()">Request ride</button>
-      </div>
-      <div class="card">
-        <h2>Safety first</h2>
-        <p>• Share your trip with family — they see your driver &amp; pickup code.<br>
-           • Always confirm the 4-digit pickup code before getting in.<br>
-           • Only verified community members can drive.</p>
-      </div>
-    </section>
-
-    <!-- RIDER WAITING -->
-    <section class="screen" id="s-waiting">
-      <div class="card center">
-        <h2 class="pulse">🔎 Looking for a driver…</h2>
-        <p id="w_info">Your request was sent to nearby drivers.</p>
-        <button class="btn danger" onclick="cancelRide()">Cancel request</button>
-      </div>
-    </section>
-
-    <!-- RIDER ACCEPTED -->
-    <section class="screen" id="s-racc">
-      <div class="card">
-        <h2>✅ Driver accepted!</h2>
-        <div class="meta"><span>Driver</span><b id="ra_name"></b></div>
-        <div class="meta"><span>Car</span><b id="ra_car"></b></div>
-        <div class="meta"><span>ETA</span><b id="ra_eta"></b></div>
-        <div class="meta"><span>Mosque</span><b id="ra_mosque"></b></div>
-        <p>Ask your driver for this pickup code before getting in:</p>
-        <div class="code" id="ra_code"></div>
-        <a class="btn secondary" id="ra_maps" target="_blank" style="text-align:center;text-decoration:none">Open route in Maps</a>
-      </div>
-    </section>
-
-    <!-- DRIVER HOME -->
-    <section class="screen" id="s-driver">
-      <div class="card online-toggle">
-        <h2>Driver mode</h2>
-        <p id="d_status">You are offline.</p>
-        <button class="big-toggle" id="goBtn" onclick="toggleOnline()">GO<br>ONLINE</button>
-        <div id="d_mosqueBox" class="hidden">
-          <label>Which mosque are you driving to?</label><select id="d_mosque"></select>
+        <div id="accountPane" hidden>
+          <p style="margin-bottom:4px"><strong id="accName"></strong></p>
+          <p style="color:var(--muted)" id="accMeta"></p>
+          <div class="modal-actions"><button class="btn ghost full" id="doLogout">Log out</button></div>
         </div>
       </div>
-      <div id="d_queue"></div>
-    </section>
+    </div>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <!-- DRIVER TRIP -->
-    <section class="screen" id="s-dtrip">
-      <div class="card">
-        <h2>🧭 Active trip</h2>
-        <div class="meta"><span>Rider</span><b id="dt_name"></b></div>
-        <div class="meta"><span>Mosque</span><b id="dt_mosque"></b></div>
-        <p>Ask the rider to confirm this pickup code:</p>
-        <div class="code" id="dt_code"></div>
-        <a class="btn secondary" id="dt_maps" target="_blank" style="text-align:center;text-decoration:none">Navigate to pickup</a>
-        <button class="btn" onclick="completeTrip()">Complete trip ✅</button>
-      </div>
-    </section>
-
-    <!-- NOTIFICATIONS -->
-    <section class="screen" id="s-notifs">
-      <div class="card"><h2>Notifications</h2><div id="notifList"></div></div>
-    </section>
-
-    <!-- PROFILE -->
-    <section class="screen" id="s-profile">
-      <div class="card">
-        <h2 id="p_name"></h2>
-        <div class="meta"><span>Email</span><b id="p_email"></b></div>
-        <div class="meta"><span>Driver</span><b id="p_car"></b></div>
-        <button class="btn danger" onclick="doLogout()">Sign out</button>
-      </div>
-    </section>
-  </main>
-  <nav id="tabbar" class="hidden">
-    <button id="tab-rider" onclick="goHome()"><span class="i">🚗</span>Ride</button>
-    <button id="tab-driver" onclick="show('driver')" class="hidden"><span class="i">🛻</span>Drive</button>
-    <button onclick="show('notifs')"><span class="i">🔔</span>Alerts</button>
-    <button onclick="show('profile')"><span class="i">👤</span>Profile</button>
-  </nav>
-</div>
-<script src="app.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
