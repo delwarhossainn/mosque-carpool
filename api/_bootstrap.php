@@ -65,6 +65,29 @@ function require_auth(): array {
 function notify(int $user_id, string $type, string $title, string $body): void {
     $st = db()->prepare('INSERT INTO notifications (user_id, type, title, body) VALUES (?,?,?,?)');
     $st->execute([$user_id, $type, $title, $body]);
+
+    // Also send Web Push (real phone banner) if the user has subscribed.
+    try {
+        require_once __DIR__ . '/_webpush.php';
+        $vapid_pub = getenv('VAPID_PUBLIC_KEY');
+        $vapid_priv = getenv('VAPID_PRIVATE_KEY');
+        if (!$vapid_pub || !$vapid_priv) return;
+
+        $subs = db()->prepare('SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE user_id = ?');
+        $subs->execute([$user_id]);
+        foreach ($subs->fetchAll() as $sub) {
+            $ok = send_web_push($sub['endpoint'], $sub['p256dh'], $sub['auth'],
+                                $vapid_pub, $vapid_priv, $title, $body);
+            // Clean up dead subscriptions.
+            if (!$ok) {
+                db()->prepare('DELETE FROM push_subscriptions WHERE user_id = ? AND endpoint = ?')
+                   ->execute([$user_id, $sub['endpoint']]);
+            }
+        }
+    } catch (Throwable $e) {
+        // Push is best-effort; the in-app notification is already saved.
+        error_log('Web push failed: ' . $e->getMessage());
+    }
 }
 
 /** Great-circle distance in km. */
