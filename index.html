@@ -6,6 +6,12 @@
   <meta name="theme-color" content="#0B5D3B" />
   <meta name="color-scheme" content="light dark" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕌</text></svg>" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Carpool" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -21,9 +27,15 @@
         <p class="appbar-eyebrow">Winnipeg · <span id="prayerHint">Fajr</span></p>
         <h1 id="pageTitle">Salaam 👋</h1>
       </div>
-      <button class="avatar-btn" id="profileBtn" aria-label="Account">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.3 3.4-6.5 8-6.5s7.3 2.2 8 6.5"/></svg>
-      </button>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="avatar-btn" id="notifBtn" aria-label="Notifications" style="position:relative">
+          <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span id="notifBadge" class="notif-badge" hidden></span>
+        </button>
+        <button class="avatar-btn" id="profileBtn" aria-label="Account">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.3 3.4-6.5 8-6.5s7.3 2.2 8 6.5"/></svg>
+        </button>
+      </div>
     </header>
 
     <main class="screens">
@@ -126,7 +138,6 @@
 
         <div id="acceptedState" hidden>
           <div id="acceptedContent"></div>
-          <button class="btn btn-ghost btn-block" style="margin-top:14px" id="resetRide">Done</button>
         </div>
       </section>
 
@@ -221,7 +232,7 @@
         <svg viewBox="0 0 24 24"><path d="M5 16v-5l2-5h10l2 5v5"/><path d="M4 12h16M7 16v2m10-2v2"/></svg>
         <span>Ride</span>
       </button>
-      <button class="tab nav-btn tab-center" data-go="drive">
+      <button class="tab nav-btn tab-center" data-go="drive" id="driveTab">
         <span class="tab-fab"><svg viewBox="0 0 24 24"><path d="M4 17h16M6 17l1.5-8h9L18 17M9 9V6h6v3"/></svg></span>
         <span>Drive</span>
       </button>
@@ -273,7 +284,13 @@
             <div class="avatar-lg" id="accAvatar">?</div>
             <div><strong id="accName"></strong><p class="muted" id="accMeta"></p></div>
           </div>
-          <button class="btn btn-danger-ghost btn-block" id="doLogout">Log out</button>
+          <div id="becomeDriverBox" hidden>
+            <div class="form-group"><label>Vehicle (optional)</label><input id="bdVehicle" placeholder="e.g. Honda Civic"/></div>
+            <div class="form-group"><label>Plate ending (optional)</label><input id="bdPlate" maxlength="8" placeholder="e.g. 235"/></div>
+            <button class="btn btn-primary btn-block" id="becomeDriverBtn">Become a driver</button>
+            <p class="helper" style="text-align:center;margin-top:10px">You'll get access to the Drive tab to offer rides.</p>
+          </div>
+          <button class="btn btn-danger-ghost btn-block" id="doLogout" style="margin-top:12px">Log out</button>
         </div>
       </div>
     </div>
@@ -291,6 +308,20 @@
         <p class="muted">Ask the rider for their 4-digit code, then enter it to start the ride.</p>
         <input id="pickupCode" inputmode="numeric" maxlength="4" placeholder="••••" class="pin-input" />
         <button class="btn btn-primary btn-lg btn-block" id="confirmPickup" style="margin-top:18px">Start ride</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ══════════ NOTIFICATIONS SHEET ══════════ -->
+  <dialog id="notifDialog">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head">
+        <h2>Notifications</h2>
+        <button class="icon-btn sm" data-close aria-label="Close">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div id="notifList" class="notif-list"></div>
       </div>
     </div>
   </dialog>
