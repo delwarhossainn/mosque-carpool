@@ -30,10 +30,16 @@ $id = (int)$pdo->lastInsertId();
 
 // How many eligible drivers are online right now? (same mosque + same gender)
 $cnt = $pdo->prepare(
-  "SELECT COUNT(*) FROM driver_status d JOIN users x ON x.id = d.user_id
+  "SELECT d.user_id FROM driver_status d JOIN users x ON x.id = d.user_id
    WHERE d.is_online = 1 AND d.mosque_id = ? AND x.gender = ? AND x.id <> ?"
 );
 $cnt->execute([$mosqueId, $u['gender'], $u['id']]);
+$drivers = $cnt->fetchAll(PDO::FETCH_COLUMN);
+foreach ($drivers as $did) {
+  notify((int)$did, 'new_request',
+    'New ride request',
+    'A rider needs a ride to ' . $mosque['name'] . '. Tap to review.');
+}
 
 respond(['ok' => true, 'request_id' => $id,
-  'mosque' => $mosque['name'], 'drivers_online' => (int)$cnt->fetchColumn()]);
+  'mosque' => $mosque['name'], 'drivers_online' => count($drivers)]);
