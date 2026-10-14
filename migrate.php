@@ -22,8 +22,8 @@ try {
     $pdo->exec("ALTER TABLE ride_requests MODIFY status ENUM('pending','accepted','picked_up','completed','cancelled') NOT NULL DEFAULT 'pending'");
     $log[] = 'status enum updated';
     // 4. Verify.
-    $row = $pdo->query("SELECT COUNT(*) AS rows, COUNT(DISTINCT name) AS unique_names FROM mosques")->fetch();
-    $log[] = "mosques: {$row['rows']} rows, {$row['unique_names']} unique names";
+    $row = $pdo->query("SELECT COUNT(*) AS total, COUNT(DISTINCT name) AS unique_names FROM mosques")->fetch();
+    $log[] = "mosques: {$row['total']} rows, {$row['unique_names']} unique names";
     $col = $pdo->query("SHOW COLUMNS FROM ride_requests LIKE 'status'")->fetch();
     $log[] = 'status column: ' . $col['Type'];
     echo "MIGRATION OK\n" . implode("\n", $log) . "\n";
