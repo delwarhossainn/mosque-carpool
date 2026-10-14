@@ -144,12 +144,24 @@ function mountTripMap(boxId, driver, target){
 }
 
 /* ---------- auth ---------- */
+function updateDriveTab(){
+  const tab = $('#driveTab');
+  if(!tab) return;
+  const isDriver = !!(state.user && state.user.has_car);
+  tab.style.display = isDriver ? '' : 'none';
+  // If a rider somehow lands on drive screen, bounce them home.
+  if(!isDriver && document.querySelector('.screen[data-screen="drive"]').classList.contains('active')){
+    showScreen('home');
+  }
+}
 function setSession(token, user){
   state.token = token;
   state.user = user;
   if(token) localStorage.setItem('mc_token', token);
   else localStorage.removeItem('mc_token');
   $('#pageTitle').textContent = user ? ('Salaam, '+user.name.split(' ')[0]+' 👋') : 'Salaam 👋';
+  updateDriveTab();
+  if(user) startNotifPoll(); else stopNotifPoll();
   // Prayer hint based on time of day.
   const ph = $('#prayerHint');
   if(ph){
@@ -178,8 +190,28 @@ function openAccount(){
   $('#accMeta').textContent = u.email+' · '+(u.gender==='female'?'Sister':'Brother')+(u.has_car?' · Driver':' · Rider');
   const av = $('#accAvatar');
   if(av) av.textContent = (u.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  // Riders can convert to drivers.
+  const bdBox = $('#becomeDriverBox');
+  if(bdBox) bdBox.hidden = !!u.has_car;
   $('#authDialog').showModal();
 }
+$('#becomeDriverBtn')?.addEventListener('click', async ()=>{
+  const btn = $('#becomeDriverBtn');
+  btn.disabled = true;
+  try{
+    await api('become_driver.php', {method:'POST', body:{
+      vehicle: $('#bdVehicle').value.trim(),
+      plate: $('#bdPlate').value.trim(),
+    }});
+    // Refresh user from server.
+    const me = await api('me.php');
+    state.user = me.user;
+    updateDriveTab();
+    openAccount(); // re-render with driver status
+    toast('You can now offer rides! Check the Drive tab.');
+  }catch(e){ toast(e.message); }
+  finally{ btn.disabled = false; }
+});
 function requireAuth(action){
   if(state.user) return true;
   state.pendingAction = action || null;
@@ -376,6 +408,60 @@ function startRiderPoll(){
 }
 function stopRiderPoll(){ clearInterval(state.riderPoll); state.riderPoll = null; }
 
+/* ---------- notifications ---------- */
+let notifPoll = null;
+let lastNotifId = 0;
+function startNotifPoll(){
+  stopNotifPoll();
+  notifPoll = setInterval(pollNotifications, 8000);
+  pollNotifications();
+}
+function stopNotifPoll(){ clearInterval(notifPoll); notifPoll = null; }
+async function pollNotifications(){
+  if(!state.user) return;
+  try{
+    const d = await api('notifications.php');
+    const badge = $('#notifBadge');
+    if(badge){
+      if(d.unread > 0){
+        badge.hidden = false;
+        badge.textContent = d.unread > 99 ? '99+' : d.unread;
+      }else badge.hidden = true;
+    }
+    // Toast for brand-new notifications (skip on first load).
+    const items = d.notifications || [];
+    if(lastNotifId > 0){
+      const fresh = items.filter(n => n.id > lastNotifId && n.is_read == 0);
+      for(const n of fresh.slice(0, 2)) toast(n.title + ' — ' + n.body);
+    }
+    if(items.length) lastNotifId = Math.max(lastNotifId, ...items.map(n => n.id));
+  }catch(e){ /* transient */ }
+}
+$('#notifBtn')?.addEventListener('click', async ()=>{
+  const list = $('#notifList');
+  list.innerHTML = '<div class="skel" style="height:70px"></div><div class="skel" style="height:70px"></div>';
+  $('#notifDialog').showModal();
+  try{
+    const d = await api('notifications.php');
+    const items = d.notifications || [];
+    list.innerHTML = items.length ? items.map(n => `
+      <div class="notif-item${n.is_read==0?' unread':''}">
+        <h4>${esc(n.title)}</h4>
+        <p>${esc(n.body)}</p>
+        <time>${esc(n.created_at)}</time>
+      </div>`).join('')
+      : '<div class="notif-empty">No notifications yet.</div>';
+    // Mark all as read.
+    if(d.unread > 0){
+      await api('mark_read.php', {method:'POST'});
+      const badge = $('#notifBadge');
+      if(badge) badge.hidden = true;
+    }
+  }catch(e){
+    list.innerHTML = '<div class="notif-empty">Could not load notifications.</div>';
+  }
+});
+
 async function pollRiderTrip(){
   try{
     const d = await api('my_trip.php');
@@ -425,6 +511,7 @@ function renderRiderTrip(t, silent){
           <span class="chip" id="riderEta">About ${t.eta_min} min</span>
         </div>
         <div class="trip-code"><span>Show this code to your driver</span><strong>${esc(t.pickup_code)}</strong><small>One-time pickup code</small></div>
+        <button class="btn btn-danger-ghost btn-block" id="riderCancelBtn" style="margin-top:14px">Cancel ride</button>
       </div>`;
   }else{
     c.innerHTML = `
@@ -442,7 +529,18 @@ function renderRiderTrip(t, silent){
     ? {lat:t.pickup_lat, lng:t.pickup_lng, label:'Your pickup'}
     : {lat:t.mosque_lat, lng:t.mosque_lng, label:t.mosque_name};
   const map = mountTripMap('riderTripMap', {lat:dPos.lat, lng:dPos.lng, label:t.driver_name}, target);
-  riderTripView = {phase, map};
+  riderTripView = {phase, map, request_id: t.request_id};
+  // Cancel button (pickup phase only — the button only exists then).
+  const rc = $('#riderCancelBtn');
+  if(rc) rc.addEventListener('click', async ()=>{
+    if(!confirm('Cancel this ride? Your driver will be notified.')) return;
+    try{ await api('cancel_request.php', {method:'POST', body:{request_id: t.request_id}}); }
+    catch(e){ toast(e.message); return; }
+    state.activeRequestId = null;
+    stopRiderPoll();
+    resetRideUI();
+    toast('Ride cancelled.');
+  });
   if(!silent) toast(phase==='pickup' ? 'A driver accepted your ride!' : 'Ride started — have a blessed trip!');
 }
 $('#cancelRequest').addEventListener('click', async ()=>{
@@ -454,7 +552,6 @@ $('#cancelRequest').addEventListener('click', async ()=>{
   resetRideUI();
   toast('Request cancelled.');
 });
-$('#resetRide').addEventListener('click', ()=>{ state.activeRequestId = null; stopRiderPoll(); resetRideUI(); });
 function resetRideUI(){
   if(riderTripView && riderTripView.map) riderTripView.map.destroy();
   riderTripView = null;
@@ -580,7 +677,8 @@ async function renderDriverTrip(t){
         <div style="display:flex;gap:9px;margin-top:14px">
           <a class="btn secondary" style="flex:1" href="${esc(target.navUrl)}" target="_blank" rel="noopener">Navigate</a>
           <button class="btn primary" style="flex:1" id="pickedUpBtn">Picked up?</button>
-        </div>` : `
+        </div>
+        <button class="btn btn-danger-ghost btn-block" id="driverCancelBtn" style="margin-top:10px">Cancel trip</button>` : `
         <div style="display:flex;gap:9px;margin-top:14px">
           <a class="btn secondary" style="flex:1" href="${esc(target.navUrl)}" target="_blank" rel="noopener">Navigate</a>
           <button class="btn primary" style="flex:1" id="completeTripBtn">Complete trip</button>
@@ -599,6 +697,14 @@ async function renderDriverTrip(t){
   if(pu) pu.addEventListener('click', ()=>{ $('#pickupCode').value=''; $('#pinDialog').showModal(); setTimeout(()=>$('#pickupCode').focus(), 100); });
   const ct = $('#completeTripBtn');
   if(ct) ct.addEventListener('click', completeDriverTrip);
+  const dc = $('#driverCancelBtn');
+  if(dc) dc.addEventListener('click', async ()=>{
+    if(!confirm('Cancel this trip? The rider will be notified and the request goes back to the queue.')) return;
+    try{ await api('driver_cancel.php', {method:'POST', body:{request_id: driverTrip.request_id}}); }
+    catch(e){ toast(e.message); return; }
+    endDriverTrip();
+    goOffline('Trip cancelled. You are now offline.');
+  });
 }
 async function completeDriverTrip(){
   try{
