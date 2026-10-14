@@ -90,3 +90,10 @@
 .avatar{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:var(--green);color:#fff;font-weight:700}
 .driver-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}
 .verified{color:var(--green);font-size:.82rem;font-weight:600}
+
+/* ---- Trip tracking ---- */
+.trip-marker{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.3);border:3px solid var(--green)}
+.trip-marker.target{border-color:var(--gold)}
+.trip-map-wrap{border-radius:16px;overflow:hidden;margin-top:14px;border:1px solid var(--line)}
+.trip-map-wrap .map-shell{height:280px}
+.pin-dots{font-size:2rem;letter-spacing:.5em;text-align:center;font-weight:700}

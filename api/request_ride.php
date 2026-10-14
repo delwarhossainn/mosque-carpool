@@ -7,7 +7,7 @@ $b = body();
 $pdo = db();
 
 $active = $pdo->prepare(
-  "SELECT id FROM ride_requests WHERE rider_id = ? AND status IN ('pending','accepted') LIMIT 1"
+  "SELECT id FROM ride_requests WHERE rider_id = ? AND status IN ('pending','accepted','picked_up') LIMIT 1"
 );
 $active->execute([$u['id']]);
 if ($active->fetch()) fail('You already have an active ride request.', 409);

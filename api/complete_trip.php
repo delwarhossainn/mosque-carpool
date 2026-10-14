@@ -7,7 +7,7 @@ $id = (int)($b['request_id'] ?? 0);
 
 $st = db()->prepare(
   "UPDATE ride_requests SET status = 'completed'
-   WHERE id = ? AND driver_id = ? AND status = 'accepted'"
+   WHERE id = ? AND driver_id = ? AND status IN ('accepted','picked_up')"
 );
 $st->execute([$id, $u['id']]);
 if ($st->rowCount() === 0) fail('Trip not found.', 404);

@@ -50,6 +50,12 @@ const state = {
   pendingAction: null,
 };
 
+/* Live trip view handles (driver + rider). */
+let riderTripView = null;   // {phase:'pickup'|'mosque', map}
+let driverTrip = null;      // {request_id}
+let driverTripView = null;  // {phase:'pickup'|'mosque', map}
+let driverLocTimer = null;
+
 /* Fallback mosque directory (DB ids 1..14, seed order) if the API is unreachable. */
 const FALLBACK_MOSQUES = [
   {id:1,  label:'Manitoba Islamic Association — Grand Mosque', address:'2445 Waverley St', lat:49.7914428, lng:-97.1749375},
@@ -84,6 +90,57 @@ async function api(path, opts={}){
 function mosqueById(id){ return state.mosques.find(m=>m.id===+id); }
 function directionsUrl(lat, lng){
   return 'https://www.google.com/maps/dir/?api=1&destination='+lat+','+lng;
+}
+
+/* ---------- trip tracking maps (MapLibre + OSRM driving route) ---------- */
+async function fetchRoute(aLng, aLat, bLng, bLat){
+  try{
+    const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${aLng},${aLat};${bLng},${bLat}?overview=full&geometries=geojson`);
+    const j = await r.json();
+    if(j.code==='Ok' && j.routes && j.routes[0]) return j.routes[0].geometry.coordinates;
+  }catch(e){}
+  return [[aLng,aLat],[bLng,bLat]]; // straight-line fallback
+}
+function tripMapStyle(){
+  return matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+    : 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+}
+/* Mounts a live trip map. Returns {moveDriver(lat,lng), destroy()} or null. */
+function mountTripMap(boxId, driver, target){
+  const box = document.getElementById(boxId);
+  if(!box || !window.maplibregl) return null;
+  try{
+    const map = new maplibregl.Map({
+      container: box, style: tripMapStyle(),
+      center: [(driver.lng+target.lng)/2, (driver.lat+target.lat)/2], zoom: 12,
+    });
+    map.addControl(new maplibregl.NavigationControl(), 'top-right');
+    const mk = (cls, emoji, lng, lat, label)=>{
+      const el = document.createElement('div');
+      el.className = 'trip-marker '+cls;
+      el.textContent = emoji;
+      return new maplibregl.Marker({element: el}).setLngLat([lng,lat])
+        .setPopup(new maplibregl.Popup({offset:22}).setHTML(`<strong>${esc(label)}</strong>`))
+        .addTo(map);
+    };
+    const dMarker = mk('driver', '🚗', driver.lng, driver.lat, driver.label || 'Driver');
+    mk('target', '📍', target.lng, target.lat, target.label || 'Destination');
+    map.on('load', async ()=>{
+      const coords = await fetchRoute(driver.lng, driver.lat, target.lng, target.lat);
+      const id = 'trip-route-'+boxId;
+      if(map.getSource(id)) return;
+      map.addSource(id, {type:'geojson', data:{type:'Feature', properties:{}, geometry:{type:'LineString', coordinates:coords}}});
+      map.addLayer({id, type:'line', source:id, paint:{'line-color':'#17643a','line-width':5,'line-opacity':0.85}});
+      const b = new maplibregl.LngLatBounds();
+      coords.forEach(c=>b.extend(c));
+      map.fitBounds(b, {padding:55});
+    });
+    return {
+      moveDriver(lat,lng){ dMarker.setLngLat([lng,lat]); },
+      destroy(){ map.remove(); },
+    };
+  }catch(e){ return null; }
 }
 
 /* ---------- auth ---------- */
@@ -311,31 +368,70 @@ async function pollRiderTrip(){
   try{
     const d = await api('my_trip.php');
     const t = d.trip;
-    if(!t || t.role!=='rider'){ stopRiderPoll(); resetRideUI(); return; }
-    if(t.status==='accepted'){
+    if(!t || t.role!=='rider'){
       stopRiderPoll();
-      renderAccepted(t);
+      const wasInTrip = !!riderTripView;
+      resetRideUI();
+      if(wasInTrip) toast('Trip completed. JazakAllah khair!');
+      return;
     }
+    if(t.status==='accepted' || t.status==='picked_up') renderRiderTrip(t);
+    else if(t.status==='pending' && riderTripView){
+      // Driver went offline mid-pickup: request is back in the queue.
+      resetRideUI();
+      $('#rideEmpty').hidden = true;
+      $('#matchingState').hidden = false;
+      toast('Your driver went offline — your request is back in the queue.');
+    }
+    // pending otherwise: keep the "looking" UI
   }catch(e){ /* transient — keep polling */ }
 }
 function initials(name){ return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
-function renderAccepted(t){
+
+/* Rider's live trip view: driver tracking map, pickup code, then ride map. */
+function renderRiderTrip(t, silent){
+  const phase = t.ride_started ? 'mosque' : 'pickup';
+  if(riderTripView && riderTripView.phase===phase){
+    // Same phase — just move the driver marker and refresh the ETA.
+    if(riderTripView.map && t.driver_lat!=null) riderTripView.map.moveDriver(t.driver_lat, t.driver_lng);
+    const eta = $('#riderEta');
+    if(eta && t.eta_min) eta.textContent = 'About '+t.eta_min+' min';
+    return;
+  }
+  if(riderTripView && riderTripView.map) riderTripView.map.destroy();
   $('#matchingState').hidden = true;
   $('#rideEmpty').hidden = true;
   const c = $('#acceptedContent');
-  c.innerHTML = `
-    <p class="eyebrow">Driver accepted</p><h2>Your ride is on the way</h2>
-    <div class="driver-card card">
-      <div class="driver-head"><div class="avatar">${esc(initials(t.driver_name))}</div><div><h3 style="margin:0">${esc(t.driver_name)}</h3><span class="verified">Same-gender match</span></div></div>
-      <div class="request-meta">
-        ${t.car_details?`<span class="chip">${esc(t.car_details)}</span>`:''}
-        <span class="chip">About ${t.eta_min} min</span>
-      </div>
-      <div class="trip-code"><span>Confirm before boarding</span><strong>${esc(t.pickup_code)}</strong><small>One-time pickup code</small></div>
-      ${t.maps_url?`<a class="btn secondary full" style="margin-top:14px" href="${esc(t.maps_url)}" target="_blank" rel="noopener">Open route in maps</a>`:''}
-    </div>`;
+  if(phase==='pickup'){
+    c.innerHTML = `
+      <p class="eyebrow">Driver accepted</p><h2>Your driver is on the way</h2>
+      <div class="trip-map-wrap"><div class="map-shell"><div id="riderTripMap" class="map"></div></div></div>
+      <div class="driver-card card" style="margin-top:12px">
+        <div class="driver-head"><div class="avatar">${esc(initials(t.driver_name))}</div><div><h3 style="margin:0">${esc(t.driver_name)}</h3><span class="verified">Same-gender match</span></div></div>
+        <div class="request-meta">
+          ${t.car_details?`<span class="chip">${esc(t.car_details)}</span>`:''}
+          <span class="chip" id="riderEta">About ${t.eta_min} min</span>
+        </div>
+        <div class="trip-code"><span>Show this code to your driver</span><strong>${esc(t.pickup_code)}</strong><small>One-time pickup code</small></div>
+      </div>`;
+  }else{
+    c.innerHTML = `
+      <p class="eyebrow">Ride started</p><h2>On the way to ${esc(t.mosque_name)}</h2>
+      <div class="trip-map-wrap"><div class="map-shell"><div id="riderTripMap" class="map"></div></div></div>
+      <div class="driver-card card" style="margin-top:12px">
+        <div class="driver-head"><div class="avatar">${esc(initials(t.driver_name))}</div><div><h3 style="margin:0">${esc(t.driver_name)}</h3><span class="verified">Same-gender match</span></div></div>
+        ${t.maps_url?`<a class="btn secondary full" style="margin-top:6px" href="${esc(t.maps_url)}" target="_blank" rel="noopener">Open route in maps</a>`:''}
+      </div>`;
+  }
   $('#acceptedState').hidden = false;
-  toast('A driver accepted your ride!');
+  const dPos = (t.driver_lat!=null && t.driver_lng!=null)
+    ? {lat:t.driver_lat, lng:t.driver_lng} : {lat:t.pickup_lat, lng:t.pickup_lng};
+  const target = phase==='pickup'
+    ? {lat:t.pickup_lat, lng:t.pickup_lng, label:'Your pickup'}
+    : {lat:t.mosque_lat, lng:t.mosque_lng, label:t.mosque_name};
+  const map = mountTripMap('riderTripMap', {lat:dPos.lat, lng:dPos.lng, label:t.driver_name}, target);
+  riderTripView = {phase, map};
+  if(!silent) toast(phase==='pickup' ? 'A driver accepted your ride!' : 'Ride started — have a blessed trip!');
 }
 $('#cancelRequest').addEventListener('click', async ()=>{
   if(!state.activeRequestId){ resetRideUI(); return; }
@@ -348,6 +444,8 @@ $('#cancelRequest').addEventListener('click', async ()=>{
 });
 $('#resetRide').addEventListener('click', ()=>{ state.activeRequestId = null; stopRiderPoll(); resetRideUI(); });
 function resetRideUI(){
+  if(riderTripView && riderTripView.map) riderTripView.map.destroy();
+  riderTripView = null;
   $('#rideEmpty').hidden = false;
   $('#matchingState').hidden = true;
   $('#acceptedState').hidden = true;
@@ -419,35 +517,94 @@ function renderIncoming(reqs){
 }
 async function respondTo(requestId, accept){
   try{
-    const d = await api('respond_request.php', {method:'POST', body:{request_id:+requestId, accept: accept?1:0}});
+    await api('respond_request.php', {method:'POST', body:{request_id:+requestId, accept: accept?1:0}});
     if(accept){
-      const t = await api('my_trip.php');
-      renderDriverTrip(t.trip, d.pickup_code);
-      toast('Request accepted. Pickup details unlocked.');
+      const d = await api('my_trip.php');
+      if(d.trip && d.trip.role==='driver'){
+        startDriverTrip(d.trip);
+        toast('Request accepted. Head to the pickup.');
+      }
     }else{
       toast('Request declined.');
       pollDriverRequests();
     }
   }catch(e){ toast(e.message); }
 }
-function renderDriverTrip(t, code){
-  const box = $('#incomingList');
-  box.innerHTML = `
-    <div class="request-card">
-      <p class="eyebrow">Accepted</p><h3>Meet your rider</h3>
-      <p>Rider: <strong>${esc(t.rider_name)}</strong></p>
-      ${t.note?`<p style="color:var(--muted)">${esc(t.note)}</p>`:''}
-      <div class="trip-code"><span>Ask the rider to confirm</span><strong>${esc(t.pickup_code || code || '')}</strong><small>One-time pickup code</small></div>
-      ${t.maps_url?`<a class="btn secondary full" style="margin-top:14px" href="${esc(t.maps_url)}" target="_blank" rel="noopener">Open pickup in maps</a>`:''}
-      <button class="btn primary full" style="margin-top:14px" id="completeTrip">Complete trip</button>
-    </div>`;
-  $('#completeTrip').addEventListener('click', async ()=>{
-    try{
-      await api('complete_trip.php', {method:'POST', body:{request_id: t.request_id}});
-      goOffline('Trip completed. JazakAllah khair!');
-    }catch(e){ toast(e.message); }
-  });
+
+/* ---------- driver trip tracking ---------- */
+function startDriverTrip(t){
+  driverTrip = {request_id: t.request_id};
+  stopDriverPoll(); // the queue is done — this trip is the whole screen now
+  renderDriverTrip(t);
+  startDriverLocPings();
 }
+function endDriverTrip(){
+  stopDriverLocPings();
+  if(driverTripView && driverTripView.map) driverTripView.map.destroy();
+  driverTripView = null;
+  driverTrip = null;
+  $('#incomingList').innerHTML = '';
+}
+/* Driver's live view: pickup phase -> PIN confirm -> ride-to-mosque phase. */
+async function renderDriverTrip(t){
+  const phase = t.ride_started ? 'mosque' : 'pickup';
+  if(driverTripView && driverTripView.map) driverTripView.map.destroy();
+  const box = $('#incomingList');
+  const target = phase==='pickup'
+    ? {lat:t.pickup_lat, lng:t.pickup_lng, label:'Rider pickup', navUrl:t.maps_url}
+    : {lat:t.mosque_lat, lng:t.mosque_lng, label:t.mosque_name, navUrl:t.mosque_maps_url};
+  box.innerHTML = `
+    <div class="trip-map-wrap"><div class="map-shell"><div id="driverTripMap" class="map"></div></div></div>
+    <div class="request-card" style="margin-top:12px">
+      <p class="eyebrow">${phase==='pickup' ? 'Heading to pickup' : 'Ride started'}</p>
+      <h3>${phase==='pickup' ? esc(t.rider_name) : 'To '+esc(t.mosque_name)}</h3>
+      ${t.note?`<p style="color:var(--muted)">${esc(t.note)}</p>`:''}
+      ${phase==='pickup' ? `
+        <div class="trip-code"><span>Ask the rider for the code</span><strong>••••</strong><small>4-digit pickup code</small></div>
+        <div style="display:flex;gap:9px;margin-top:14px">
+          <a class="btn secondary" style="flex:1" href="${esc(target.navUrl)}" target="_blank" rel="noopener">Navigate</a>
+          <button class="btn primary" style="flex:1" id="pickedUpBtn">Picked up?</button>
+        </div>` : `
+        <div style="display:flex;gap:9px;margin-top:14px">
+          <a class="btn secondary" style="flex:1" href="${esc(target.navUrl)}" target="_blank" rel="noopener">Navigate</a>
+          <button class="btn primary" style="flex:1" id="completeTripBtn">Complete trip</button>
+        </div>`}
+    </div>`;
+  let dPos;
+  try{
+    const pos = await getPosition();
+    dPos = {lat:pos.coords.latitude, lng:pos.coords.longitude};
+  }catch(e){
+    dPos = {lat:target.lat, lng:target.lng}; // fallback: center on destination
+  }
+  const map = mountTripMap('driverTripMap', {lat:dPos.lat, lng:dPos.lng, label:'You'}, target);
+  driverTripView = {phase, map};
+  const pu = $('#pickedUpBtn');
+  if(pu) pu.addEventListener('click', ()=>{ $('#pickupCode').value=''; $('#pinDialog').showModal(); setTimeout(()=>$('#pickupCode').focus(), 100); });
+  const ct = $('#completeTripBtn');
+  if(ct) ct.addEventListener('click', completeDriverTrip);
+}
+async function completeDriverTrip(){
+  try{
+    await api('complete_trip.php', {method:'POST', body:{request_id: driverTrip.request_id}});
+  }catch(e){ toast(e.message); return; }
+  endDriverTrip();
+  goOffline('Trip completed. JazakAllah khair!');
+}
+/* Driver position ping — feeds the rider's live map. */
+function startDriverLocPings(){
+  stopDriverLocPings();
+  const ping = async ()=>{
+    try{
+      const pos = await getPosition();
+      await api('update_location.php', {method:'POST', body:{lat:pos.coords.latitude, lng:pos.coords.longitude}});
+      if(driverTripView && driverTripView.map) driverTripView.map.moveDriver(pos.coords.latitude, pos.coords.longitude);
+    }catch(e){ /* GPS hiccup — next ping in 10s */ }
+  };
+  ping();
+  driverLocTimer = setInterval(ping, 10000);
+}
+function stopDriverLocPings(){ clearInterval(driverLocTimer); driverLocTimer = null; }
 async function goOffline(msg){
   try{ await api('driver_status.php', {method:'POST', body:{online:0}}); }catch(e){}
   setDriverOfflineUI();
@@ -456,12 +613,37 @@ async function goOffline(msg){
 function setDriverOfflineUI(){
   state.driverOnline = false;
   stopDriverPoll();
+  endDriverTrip();
   $('#driverSetup').hidden = false;
   $('#onlinePanel').hidden = true;
   $('#statusDot').classList.remove('online');
   $('#driverStatusText').textContent = 'You are offline';
 }
+/* Restore the online panel after a page reload. */
+function restoreDriverOnline(withQueue=true){
+  state.driverOnline = true;
+  $('#driverSetup').hidden = true;
+  $('#onlinePanel').hidden = false;
+  $('#statusDot').classList.add('online');
+  $('#driverStatusText').textContent = 'Online — waiting for requests';
+  if(withQueue){ pollDriverRequests(); startDriverPoll(); }
+}
 $('#goOffline').addEventListener('click', ()=>goOffline('You are offline.'));
+
+/* Pickup PIN dialog wiring. */
+$('#pinClose').addEventListener('click', ()=>$('#pinDialog').close());
+$('#confirmPickup').addEventListener('click', async ()=>{
+  const code = $('#pickupCode').value.trim();
+  if(!/^\d{4}$/.test(code)){ toast('Enter the 4-digit code.'); return; }
+  if(!driverTrip){ $('#pinDialog').close(); return; }
+  try{
+    await api('verify_pickup.php', {method:'POST', body:{request_id: driverTrip.request_id, code}});
+    $('#pinDialog').close();
+    const d = await api('my_trip.php');
+    if(d.trip && d.trip.role==='driver') renderDriverTrip(d.trip);
+    toast('Ride started!');
+  }catch(e){ toast(e.message); }
+});
 
 function syncDriverUI(user){
   // If the driver was left online in a previous session, reflect it.
@@ -496,13 +678,22 @@ $('#suPassword').addEventListener('keydown', e=>{ if(e.key==='Enter') doSignup()
       const d = await api('me.php');
       setSession(state.token, d.user);
       syncDriverUI(d.user);
-      // If the rider has an active trip, resume its UI.
+      // Resume any active trip (rider or driver), and the driver's online state.
       const t = await api('my_trip.php').catch(()=>null);
-      if(t && t.trip && t.trip.role==='rider'){
-        state.activeRequestId = t.trip.request_id;
-        $('#rideEmpty').hidden = true;
-        if(t.trip.status==='accepted') renderAccepted(t.trip);
-        else { $('#matchingState').hidden = false; startRiderPoll(); }
+      if(t && t.trip){
+        if(t.trip.role==='rider'){
+          state.activeRequestId = t.trip.request_id;
+          $('#rideEmpty').hidden = true;
+          if(t.trip.status==='accepted' || t.trip.status==='picked_up'){ renderRiderTrip(t.trip, true); startRiderPoll(); }
+          else { $('#matchingState').hidden = false; startRiderPoll(); }
+        }else if(t.trip.role==='driver'){
+          restoreDriverOnline(false);
+          $('#driverStatusText').textContent = 'Online — on a trip';
+          startDriverTrip(t.trip);
+        }
+      }else if(state.user && state.user.has_car){
+        const ds = await api('driver_status.php').catch(()=>null);
+        if(ds && ds.online) restoreDriverOnline();
       }
     }catch(e){
       setSession(null, null); // bad/expired token

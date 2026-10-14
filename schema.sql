@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS mosques (
   province VARCHAR(10) NOT NULL DEFAULT 'MB',
   postal_code VARCHAR(12) NULL,
   lat DECIMAL(10,7) NOT NULL,
-  lng DECIMAL(10,7) NOT NULL
+  lng DECIMAL(10,7) NOT NULL,
+  UNIQUE KEY uq_mosque_name_address (name, address)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS users (
@@ -50,7 +51,7 @@ CREATE TABLE IF NOT EXISTS ride_requests (
   pickup_lat DECIMAL(10,7) NOT NULL,
   pickup_lng DECIMAL(10,7) NOT NULL,
   note VARCHAR(255) NULL,
-  status ENUM('pending','accepted','completed','cancelled') NOT NULL DEFAULT 'pending',
+  status ENUM('pending','accepted','picked_up','completed','cancelled') NOT NULL DEFAULT 'pending',
   driver_id INT UNSIGNED NULL,
   pickup_code CHAR(4) NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -87,7 +88,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 -- ============================================================
 -- Verified Winnipeg mosque directory (14 destinations)
 -- ============================================================
-INSERT INTO mosques (name, address, city, province, postal_code, lat, lng) VALUES
+INSERT IGNORE INTO mosques (name, address, city, province, postal_code, lat, lng) VALUES
 ('Manitoba Islamic Association — Grand Mosque', '2445 Waverley St', 'Winnipeg', 'MB', 'R3Y 1S3', 49.7914428, -97.1749375),
 ('Winnipeg Central Mosque', '715 Ellice Ave', 'Winnipeg', 'MB', 'R3G 0B3', 49.8932488, -97.1644922),
 ('Salam Masjid', '294 Burrows Ave', 'Winnipeg', 'MB', NULL, 49.9156197, -97.1348114),

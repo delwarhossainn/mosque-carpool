@@ -160,6 +160,16 @@
       </div>
     </div>
   </dialog>
+  <dialog id="pinDialog">
+    <div class="modal">
+      <div class="modal-head"><h2>Confirm pickup</h2><button class="close-btn" id="pinClose" aria-label="Close">×</button></div>
+      <div class="modal-body">
+        <p style="color:var(--muted)">Ask the rider for their 4-digit pickup code, then enter it below to start the ride.</p>
+        <div class="form-group"><label for="pickupCode">Pickup code</label><input id="pickupCode" inputmode="numeric" maxlength="4" placeholder="••••" style="font-size:1.7rem;letter-spacing:.45em;text-align:center"/></div>
+        <div class="modal-actions"><button class="btn primary full" id="confirmPickup">Start ride</button></div>
+      </div>
+    </div>
+  </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
