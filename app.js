@@ -161,7 +161,7 @@ function setSession(token, user){
   else localStorage.removeItem('mc_token');
   $('#pageTitle').textContent = user ? ('Salaam, '+user.name.split(' ')[0]+' 👋') : 'Salaam 👋';
   updateDriveTab();
-  if(user) startNotifPoll(); else stopNotifPoll();
+  if(user){ startNotifPoll(); setupPush(); } else stopNotifPoll();
   // Prayer hint based on time of day.
   const ph = $('#prayerHint');
   if(ph){
@@ -407,6 +407,47 @@ function startRiderPoll(){
   pollRiderTrip();
 }
 function stopRiderPoll(){ clearInterval(state.riderPoll); state.riderPoll = null; }
+
+/* ---------- web push notifications ---------- */
+const VAPID_PUBLIC_KEY = 'BKuno4H_1ux8FL65l3cnHwY0NjNWpgICOeyoMFh__HcXIQs96W0ki_kmWYZsq4oN3gsQndG3fXyCqY8bMPRPOy8';
+function urlBase64ToUint8Array(base64String){
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for(let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+  return outputArray;
+}
+async function setupPush(){
+  if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try{
+    const reg = await navigator.serviceWorker.register('sw.js');
+    // Only prompt if not already decided.
+    if(Notification.permission === 'default' && state.user){
+      const granted = await Notification.requestPermission();
+      if(granted !== 'granted') return;
+    }
+    if(Notification.permission !== 'granted') return;
+
+    let sub = await reg.pushManager.getSubscription();
+    if(!sub){
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+    }
+    // Send to backend.
+    const json = sub.toJSON();
+    await api('save_subscription.php', {method:'POST', body:{
+      endpoint: json.endpoint,
+      p256dh: json.keys.p256dh,
+      auth: json.keys.auth,
+    }});
+  }catch(e){
+    // Push is optional; failures are silent.
+    console.warn('Push setup failed:', e);
+  }
+}
 
 /* ---------- notifications ---------- */
 let notifPoll = null;
