@@ -367,8 +367,8 @@ function stopRiderPoll(){ clearInterval(state.riderPoll); state.riderPoll = null
 async function pollRiderTrip(){
   try{
     const d = await api('my_trip.php');
-    const t = d.trip;
-    if(!t || t.role!=='rider'){
+    const t = d.rider_trip;
+    if(!t){
       stopRiderPoll();
       const wasInTrip = !!riderTripView;
       resetRideUI();
@@ -520,9 +520,13 @@ async function respondTo(requestId, accept){
     await api('respond_request.php', {method:'POST', body:{request_id:+requestId, accept: accept?1:0}});
     if(accept){
       const d = await api('my_trip.php');
-      if(d.trip && d.trip.role==='driver'){
-        startDriverTrip(d.trip);
+      if(d.driver_trip){
+        startDriverTrip(d.driver_trip);
         toast('Request accepted. Head to the pickup.');
+      }else{
+        // Accept landed but no driver trip came back — never fail silently.
+        toast('Accepted, but the trip view did not load. Stay on the Drive tab and tell me.');
+        pollDriverRequests();
       }
     }else{
       toast('Request declined.');
@@ -640,7 +644,7 @@ $('#confirmPickup').addEventListener('click', async ()=>{
     await api('verify_pickup.php', {method:'POST', body:{request_id: driverTrip.request_id, code}});
     $('#pinDialog').close();
     const d = await api('my_trip.php');
-    if(d.trip && d.trip.role==='driver') renderDriverTrip(d.trip);
+    if(d.driver_trip) renderDriverTrip(d.driver_trip);
     toast('Ride started!');
   }catch(e){ toast(e.message); }
 });
@@ -678,22 +682,23 @@ $('#suPassword').addEventListener('keydown', e=>{ if(e.key==='Enter') doSignup()
       const d = await api('me.php');
       setSession(state.token, d.user);
       syncDriverUI(d.user);
-      // Resume any active trip (rider or driver), and the driver's online state.
+      // Resume any live trips — rider and driver roles are independent.
       const t = await api('my_trip.php').catch(()=>null);
-      if(t && t.trip){
-        if(t.trip.role==='rider'){
-          state.activeRequestId = t.trip.request_id;
+      if(t){
+        if(t.rider_trip){
+          state.activeRequestId = t.rider_trip.request_id;
           $('#rideEmpty').hidden = true;
-          if(t.trip.status==='accepted' || t.trip.status==='picked_up'){ renderRiderTrip(t.trip, true); startRiderPoll(); }
+          if(t.rider_trip.status==='accepted' || t.rider_trip.status==='picked_up'){ renderRiderTrip(t.rider_trip, true); startRiderPoll(); }
           else { $('#matchingState').hidden = false; startRiderPoll(); }
-        }else if(t.trip.role==='driver'){
+        }
+        if(t.driver_trip){
           restoreDriverOnline(false);
           $('#driverStatusText').textContent = 'Online — on a trip';
-          startDriverTrip(t.trip);
+          startDriverTrip(t.driver_trip);
+        }else if(state.user && state.user.has_car){
+          const ds = await api('driver_status.php').catch(()=>null);
+          if(ds && ds.online) restoreDriverOnline();
         }
-      }else if(state.user && state.user.has_car){
-        const ds = await api('driver_status.php').catch(()=>null);
-        if(ds && ds.online) restoreDriverOnline();
       }
     }catch(e){
       setSession(null, null); // bad/expired token
