@@ -1,1 +1,303 @@
-PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgPG1ldGEgY2hhcnNldD0idXRmLTgiIC8+CiAgPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xLCB2aWV3cG9ydC1maXQ9Y292ZXIsIHVzZXItc2NhbGFibGU9bm8iIC8+CiAgPG1ldGEgbmFtZT0idGhlbWUtY29sb3IiIGNvbnRlbnQ9IiMwQjVEM0IiIC8+CiAgPG1ldGEgbmFtZT0iY29sb3Itc2NoZW1lIiBjb250ZW50PSJsaWdodCBkYXJrIiAvPgogIDxsaW5rIHJlbD0iaWNvbiIgaHJlZj0iZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCc+PHRleHQgeT0nLjllbScgZm9udC1zaXplPSc5MCc+8J+VjDwvdGV4dD48L3N2Zz4iIC8+CiAgPGxpbmsgcmVsPSJwcmVjb25uZWN0IiBocmVmPSJodHRwczovL2ZvbnRzLmdvb2dsZWFwaXMuY29tIj4KICA8bGluayByZWw9InByZWNvbm5lY3QiIGhyZWY9Imh0dHBzOi8vZm9udHMuZ3N0YXRpYy5jb20iIGNyb3Nzb3JpZ2luPgogIDxsaW5rIGhyZWY9Imh0dHBzOi8vZm9udHMuZ29vZ2xlYXBpcy5jb20vY3NzMj9mYW1pbHk9UGx1cytKYWthcnRhK1NhbnM6d2dodEA0MDA7NTAwOzYwMDs3MDA7ODAwJmRpc3BsYXk9c3dhcCIgcmVsPSJzdHlsZXNoZWV0Ij4KICA8bGluayBocmVmPSJodHRwczovL3VucGtnLmNvbS9tYXBsaWJyZS1nbEA0LjcuMS9kaXN0L21hcGxpYnJlLWdsLmNzcyIgcmVsPSJzdHlsZXNoZWV0IiAvPgogIDxsaW5rIHJlbD0ic3R5bGVzaGVldCIgaHJlZj0ic3R5bGUuY3NzIiAvPgogIDx0aXRsZT5Nb3NxdWUgQ2FycG9vbDwvdGl0bGU+CjwvaGVhZD4KPGJvZHk+CiAgPGRpdiBjbGFzcz0icGhvbmUiPgogICAgPCEtLSDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZAgSEVBREVSIOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkCAtLT4KICAgIDxoZWFkZXIgY2xhc3M9ImFwcGJhciI+CiAgICAgIDxkaXYgY2xhc3M9ImFwcGJhci1ncmVldCI+CiAgICAgICAgPHAgY2xhc3M9ImFwcGJhci1leWVicm93Ij5XaW5uaXBlZyDCtyA8c3BhbiBpZD0icHJheWVySGludCI+RmFqcjwvc3Bhbj48L3A+CiAgICAgICAgPGgxIGlkPSJwYWdlVGl0bGUiPlNhbGFhbSDwn5GLPC9oMT4KICAgICAgPC9kaXY+CiAgICAgIDxidXR0b24gY2xhc3M9ImF2YXRhci1idG4iIGlkPSJwcm9maWxlQnRuIiBhcmlhLWxhYmVsPSJBY2NvdW50Ij4KICAgICAgICA8c3ZnIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSI4IiByPSI0Ii8+PHBhdGggZD0iTTQgMjFjLjctNC4zIDMuNC02LjUgOC02LjVzNy4zIDIuMiA4IDYuNSIvPjwvc3ZnPgogICAgICA8L2J1dHRvbj4KICAgIDwvaGVhZGVyPgoKICAgIDxtYWluIGNsYXNzPSJzY3JlZW5zIj4KICAgICAgPCEtLSDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZAgSE9NRSDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZAgLS0+CiAgICAgIDxzZWN0aW9uIGNsYXNzPSJzY3JlZW4gYWN0aXZlIiBkYXRhLXNjcmVlbj0iaG9tZSI+CiAgICAgICAgPGRpdiBjbGFzcz0iaGVyby1jYXJkIj4KICAgICAgICAgIDxkaXYgY2xhc3M9Imhlcm8tZ2xvdyI+PC9kaXY+CiAgICAgICAgICA8cCBjbGFzcz0iaGVyby1raWNrZXIiPkEgcmlkZSBjYW4gYmUgYSBzYWRhcWFoIPCfpLI8L3A+CiAgICAgICAgICA8cCBjbGFzcz0iaGVyby10aXRsZSI+R29pbmcgdG8gdGhlIG1hc2ppZD8gQnJpbmcgc29tZW9uZSBhbG9uZy48L3A+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJoZXJvLWFjdGlvbnMiPgogICAgICAgICAgICA8YnV0dG9uIGNsYXNzPSJidG4gYnRuLWxpZ2h0IiBkYXRhLWFjdGlvbj0icmVxdWVzdCI+CiAgICAgICAgICAgICAgPHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGQ9Ik01IDE2di01bDItNWgxMGwyIDV2NSIvPjxwYXRoIGQ9Ik00IDEyaDE2TTcgMTZ2Mm0xMC0ydjIiLz48L3N2Zz4KICAgICAgICAgICAgICBGaW5kIGEgcmlkZQogICAgICAgICAgICA8L2J1dHRvbj4KICAgICAgICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuIGJ0bi1vdXRsaW5lLWxpZ2h0IiBkYXRhLWFjdGlvbj0iZHJpdmUiPgogICAgICAgICAgICAgIDxzdmcgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNNCAxN2gxNk02IDE3bDEuNS04aDlMMTggMTdNOSA5VjZoNnYzIi8+PC9zdmc+CiAgICAgICAgICAgICAgT2ZmZXIgYSByaWRlCiAgICAgICAgICAgIDwvYnV0dG9uPgogICAgICAgICAgPC9kaXY+CiAgICAgICAgPC9kaXY+CgogICAgICAgIDxkaXYgY2xhc3M9InNlY3Rpb24tcm93Ij4KICAgICAgICAgIDxoMj5OZWFyYnkgbW9zcXVlczwvaDI+CiAgICAgICAgICA8c3BhbiBjbGFzcz0ic2VjdGlvbi1saW5rIiBpZD0ibW9zcXVlQ291bnQiPjwvc3Bhbj4KICAgICAgICA8L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzPSJtb3NxdWUtc3RyaXAiIGlkPSJtb3NxdWVTdHJpcCI+CiAgICAgICAgICA8IS0tIGZpbGxlZCBieSBKUyAtLT4KICAgICAgICA8L2Rpdj4KCiAgICAgICAgPGRpdiBjbGFzcz0ibWFwLWNhcmQiPgogICAgICAgICAgPGRpdiBpZD0iaG9tZU1hcCIgY2xhc3M9Im1hcCI+PC9kaXY+CiAgICAgICAgPC9kaXY+CgogICAgICAgIDxkaXYgY2xhc3M9InRydXN0LXJvdyI+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJ0cnVzdC1jaGlwIj4KICAgICAgICAgICAgPHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGQ9Ik0xMiAzbDggNHY1YzAgNS0zLjQgOC4yLTggOS00LjYtLjgtOC00LTgtOVY3bDgtNHoiLz48cGF0aCBkPSJNOSAxMmwyIDIgNC00Ii8+PC9zdmc+CiAgICAgICAgICAgIDxzcGFuPlNhbWUtZ2VuZGVyIG1hdGNoaW5nPC9zcGFuPgogICAgICAgICAgPC9kaXY+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJ0cnVzdC1jaGlwIj4KICAgICAgICAgICAgPHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiPjxjaXJjbGUgY3g9IjEyIiBjeT0iOCIgcj0iNCIvPjxwYXRoIGQ9Ik00IDIxYy43LTQuMyAzLjQtNi41IDgtNi41czcuMyAyLjIgOCA2LjUiLz48L3N2Zz4KICAgICAgICAgICAgPHNwYW4+UHJpdmF0ZSB1bnRpbCBhY2NlcHRlZDwvc3Bhbj4KICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPGRpdiBjbGFzcz0idHJ1c3QtY2hpcCI+CiAgICAgICAgICAgIDxzdmcgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNOCAxMVY3YTQgNCAwIDAgMSA4IDB2NE02IDExaDEydjEwSDZ6Ii8+PC9zdmc+CiAgICAgICAgICAgIDxzcGFuPlBpY2t1cCBjb2RlIGNoZWNrPC9zcGFuPgogICAgICAgICAgPC9kaXY+CiAgICAgICAgPC9kaXY+CiAgICAgIDwvc2VjdGlvbj4KCiAgICAgIDwhLS0g4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQIFJJREUg4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQIC0tPgogICAgICA8c2VjdGlvbiBjbGFzcz0ic2NyZWVuIiBkYXRhLXNjcmVlbj0icmlkZSI+CiAgICAgICAgPGRpdiBjbGFzcz0icGFnZS1oZWFkIj4KICAgICAgICAgIDxwIGNsYXNzPSJleWVicm93Ij5SaWRlcjwvcD4KICAgICAgICAgIDxoMj5XaGVyZSB0bz88L2gyPgogICAgICAgICAgPHAgY2xhc3M9InBhZ2Utc3ViIj5Ecml2ZXJzIG9ubHkgc2VlIGEgbmVhcmJ5LCBzYW1lLWdlbmRlciByZXF1ZXN0LiBZb3VyIGV4YWN0IHNwb3Qgc3RheXMgaGlkZGVuIHVudGlsIG9uZSBhY2NlcHRzLjwvcD4KICAgICAgICA8L2Rpdj4KCiAgICAgICAgPGRpdiBpZD0icmlkZUVtcHR5Ij4KICAgICAgICAgIDxkaXYgY2xhc3M9ImZvcm0tY2FyZCI+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9ImZvcm0tZ3JvdXAiPgogICAgICAgICAgICAgIDxsYWJlbD5QaWNrdXAgYXJlYTwvbGFiZWw+CiAgICAgICAgICAgICAgPGRpdiBjbGFzcz0iaW5wdXQtcm93Ij4KICAgICAgICAgICAgICAgIDxpbnB1dCBpZD0icGlja3VwIiBwbGFjZWhvbGRlcj0iSW50ZXJzZWN0aW9uIG9yIGFyZWEiIGF1dG9jb21wbGV0ZT0ib2ZmIiAvPgogICAgICAgICAgICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuIGJ0bi1zb2Z0IGJ0bi1zbSIgaWQ9ImxvY2F0ZUJ0biIgdHlwZT0iYnV0dG9uIj4KICAgICAgICAgICAgICAgICAgPHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiLz48cGF0aCBkPSJNMTIgMnYzbTAgMTR2M00yIDEyaDNtMTQgMGgzIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOCIvPjwvc3ZnPgogICAgICAgICAgICAgICAgICBMb2NhdGUKICAgICAgICAgICAgICAgIDwvYnV0dG9uPgogICAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICAgIDxwIGNsYXNzPSJoZWxwZXIiIGlkPSJsb2NhdGlvblN0YXR1cyI+WW91ciBwcmVjaXNlIGxvY2F0aW9uIGlzIHNoYXJlZCBvbmx5IGFmdGVyIGEgZHJpdmVyIGFjY2VwdHMuPC9wPgogICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgPGRpdiBjbGFzcz0iZm9ybS1ncm91cCI+CiAgICAgICAgICAgICAgPGxhYmVsIGZvcj0icmlkZU1vc3F1ZSI+RGVzdGluYXRpb24gbW9zcXVlPC9sYWJlbD4KICAgICAgICAgICAgICA8c2VsZWN0IGlkPSJyaWRlTW9zcXVlIj48L3NlbGVjdD4KICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9ImZvcm0tZ3JvdXAiPgogICAgICAgICAgICAgIDxsYWJlbD5QcmF5ZXIgd2luZG93PC9sYWJlbD4KICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJzZWciIGlkPSJyaWRlV2luZG93Ij4KICAgICAgICAgICAgICAgIDxidXR0b24gY2xhc3M9InNlZy1idG4gY2hvaWNlIHNlbGVjdGVkIiBkYXRhLXZhbHVlPSJGYWpyIj5GYWpyPC9idXR0b24+CiAgICAgICAgICAgICAgICA8YnV0dG9uIGNsYXNzPSJzZWctYnRuIGNob2ljZSIgZGF0YS12YWx1ZT0iRGh1aHIiPkRodWhyPC9idXR0b24+CiAgICAgICAgICAgICAgICA8YnV0dG9uIGNsYXNzPSJzZWctYnRuIGNob2ljZSIgZGF0YS12YWx1ZT0iQXNyIj5Bc3I8L2J1dHRvbj4KICAgICAgICAgICAgICAgIDxidXR0b24gY2xhc3M9InNlZy1idG4gY2hvaWNlIiBkYXRhLXZhbHVlPSJNYWdocmliIC8gSXNoYSI+TWFnaHJpYsK3SXNoYTwvYnV0dG9uPgogICAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgPGRpdiBjbGFzcz0iZm9ybS1ncm91cCI+CiAgICAgICAgICAgICAgPGxhYmVsIGZvcj0icmlkZXJzIj5TZWF0cyBuZWVkZWQ8L2xhYmVsPgogICAgICAgICAgICAgIDxzZWxlY3QgaWQ9InJpZGVycyI+PG9wdGlvbj4xIHJpZGVyPC9vcHRpb24+PG9wdGlvbj4yIHJpZGVyczwvb3B0aW9uPjxvcHRpb24+MyByaWRlcnM8L29wdGlvbj48L3NlbGVjdD4KICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgIDxidXR0b24gY2xhc3M9ImJ0biBidG4tcHJpbWFyeSBidG4tbGcgYnRuLWJsb2NrIiBpZD0ic2VuZFJlcXVlc3QiPlJlcXVlc3QgcmlkZTwvYnV0dG9uPgogICAgICAgICAgICA8YSBpZD0icmlkZURpcmVjdGlvbnMiIGNsYXNzPSJwcmV2aWV3LWxpbmsiIGhyZWY9IiMiIHRhcmdldD0iX2JsYW5rIiByZWw9Im5vb3BlbmVyIj5QcmV2aWV3IHJvdXRlIGluIE1hcHMg4oaSPC9hPgogICAgICAgICAgPC9kaXY+CiAgICAgICAgPC9kaXY+CgogICAgICAgIDxkaXYgaWQ9Im1hdGNoaW5nU3RhdGUiIGNsYXNzPSJzdGF0dXMtY2FyZCIgaGlkZGVuPgogICAgICAgICAgPGRpdiBjbGFzcz0icHVsc2UtcmluZyI+PGRpdiBjbGFzcz0icHVsc2UtY29yZSI+8J+alzwvZGl2PjwvZGl2PgogICAgICAgICAgPHAgY2xhc3M9ImV5ZWJyb3ciPlJlcXVlc3Qgc2VudDwvcD4KICAgICAgICAgIDxoMj5GaW5kaW5nIHlvdXIgZHJpdmVy4oCmPC9oMj4KICAgICAgICAgIDxwIGNsYXNzPSJtdXRlZCI+TmVhcmJ5IHNhbWUtZ2VuZGVyIGRyaXZlcnMgaGVhZGluZyB0byB5b3VyIG1vc3F1ZSB3aWxsIHNlZSB5b3VyIHJlcXVlc3QuIFRoaXMgdXN1YWxseSB0YWtlcyBhIG1pbnV0ZSBvciB0d28uPC9wPgogICAgICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuIGJ0bi1naG9zdCBidG4tYmxvY2siIGlkPSJjYW5jZWxSZXF1ZXN0Ij5DYW5jZWwgcmVxdWVzdDwvYnV0dG9uPgogICAgICAgIDwvZGl2PgoKICAgICAgICA8ZGl2IGlkPSJhY2NlcHRlZFN0YXRlIiBoaWRkZW4+CiAgICAgICAgICA8ZGl2IGlkPSJhY2NlcHRlZENvbnRlbnQiPjwvZGl2PgogICAgICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuIGJ0bi1naG9zdCBidG4tYmxvY2siIHN0eWxlPSJtYXJnaW4tdG9wOjE0cHgiIGlkPSJyZXNldFJpZGUiPkRvbmU8L2J1dHRvbj4KICAgICAgICA8L2Rpdj4KICAgICAgPC9zZWN0aW9uPgoKICAgICAgPCEtLSDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZAgRFJJVkUg4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQIC0tPgogICAgICA8c2VjdGlvbiBjbGFzcz0ic2NyZWVuIiBkYXRhLXNjcmVlbj0iZHJpdmUiPgogICAgICAgIDxkaXYgY2xhc3M9InBhZ2UtaGVhZCI+CiAgICAgICAgICA8cCBjbGFzcz0iZXllYnJvdyI+RHJpdmVyPC9wPgogICAgICAgICAgPGgyPlNoYXJlIHlvdXIgZHJpdmU8L2gyPgogICAgICAgICAgPHAgY2xhc3M9InBhZ2Utc3ViIj5HbyBvbmxpbmUgZm9yIG9uZSBtb3NxdWUuIE9ubHkgc2FtZS1nZW5kZXIgcmVxdWVzdHMgbmVhcmJ5IGNhbiByZWFjaCB5b3UuPC9wPgogICAgICAgIDwvZGl2PgoKICAgICAgICA8ZGl2IGNsYXNzPSJkcml2ZXItY2FyZCI+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJkcml2ZXItdG9wIj4KICAgICAgICAgICAgPGRpdj4KICAgICAgICAgICAgICA8cCBjbGFzcz0iZXllYnJvdyI+U3RhdHVzPC9wPgogICAgICAgICAgICAgIDxoMyBpZD0iZHJpdmVyU3RhdHVzVGV4dCI+WW91J3JlIG9mZmxpbmU8L2gzPgogICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgPHNwYW4gY2xhc3M9InN0YXR1cy1kb3QiIGlkPSJzdGF0dXNEb3QiPjwvc3Bhbj4KICAgICAgICAgIDwvZGl2PgoKICAgICAgICAgIDxkaXYgaWQ9ImRyaXZlclNldHVwIj4KICAgICAgICAgICAgPGRpdiBjbGFzcz0iZm9ybS1ncm91cCI+CiAgICAgICAgICAgICAgPGxhYmVsIGZvcj0iZHJpdmVNb3NxdWUiPkRyaXZpbmcgdG88L2xhYmVsPgogICAgICAgICAgICAgIDxzZWxlY3QgaWQ9ImRyaXZlTW9zcXVlIj48L3NlbGVjdD4KICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9ImZvcm0tZ3JvdXAiPgogICAgICAgICAgICAgIDxsYWJlbD5EZXBhcnR1cmUgd2luZG93PC9sYWJlbD4KICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJzZWciIGlkPSJkcml2ZVdpbmRvdyI+CiAgICAgICAgICAgICAgICA8YnV0dG9uIGNsYXNzPSJzZWctYnRuIGNob2ljZSBzZWxlY3RlZCIgZGF0YS12YWx1ZT0iRmFqciI+RmFqcjwvYnV0dG9uPgogICAgICAgICAgICAgICAgPGJ1dHRvbiBjbGFzcz0ic2VnLWJ0biBjaG9pY2UiIGRhdGEtdmFsdWU9IkRodWhyIj5EaHVocjwvYnV0dG9uPgogICAgICAgICAgICAgICAgPGJ1dHRvbiBjbGFzcz0ic2VnLWJ0biBjaG9pY2UiIGRhdGEtdmFsdWU9IkFzciI+QXNyPC9idXR0b24+CiAgICAgICAgICAgICAgICA8YnV0dG9uIGNsYXNzPSJzZWctYnRuIGNob2ljZSIgZGF0YS12YWx1ZT0iTWFnaHJpYiAvIElzaGEiPk1hZ2hyaWLCt0lzaGE8L2J1dHRvbj4KICAgICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9ImZvcm0tZ3JvdXAiPgogICAgICAgICAgICAgIDxsYWJlbCBmb3I9InNlYXRDb3VudCI+T3BlbiBzZWF0czwvbGFiZWw+CiAgICAgICAgICAgICAgPHNlbGVjdCBpZD0ic2VhdENvdW50Ij48b3B0aW9uPjEgc2VhdDwvb3B0aW9uPjxvcHRpb24gc2VsZWN0ZWQ+MiBzZWF0czwvb3B0aW9uPjxvcHRpb24+MyBzZWF0czwvb3B0aW9uPjxvcHRpb24+NCBzZWF0czwvb3B0aW9uPjwvc2VsZWN0PgogICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuIGJ0bi1wcmltYXJ5IGJ0bi1sZyBidG4tYmxvY2siIGlkPSJnb09ubGluZSI+R28gb25saW5lPC9idXR0b24+CiAgICAgICAgICA8L2Rpdj4KCiAgICAgICAgICA8ZGl2IGlkPSJvbmxpbmVQYW5lbCIgaGlkZGVuPgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJvbmxpbmUtYmFubmVyIj4KICAgICAgICAgICAgICA8c3BhbiBjbGFzcz0ibGl2ZS1kb3QiPjwvc3Bhbj4KICAgICAgICAgICAgICA8ZGl2PjxzdHJvbmc+WW91J3JlIHZpc2libGUgdG8gcmlkZXJzPC9zdHJvbmc+PHA+TmV3IHJlcXVlc3RzIGFwcGVhciBiZWxvdyBhdXRvbWF0aWNhbGx5LjwvcD48L2Rpdj4KICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9InJlcXVlc3QtbGlzdCIgaWQ9ImluY29taW5nTGlzdCI+PC9kaXY+CiAgICAgICAgICAgIDxidXR0b24gY2xhc3M9ImJ0biBidG4tZGFuZ2VyLWdob3N0IGJ0bi1ibG9jayIgc3R5bGU9Im1hcmdpbi10b3A6MTRweCIgaWQ9ImdvT2ZmbGluZSI+R28gb2ZmbGluZTwvYnV0dG9uPgogICAgICAgICAgPC9kaXY+CiAgICAgICAgPC9kaXY+CiAgICAgIDwvc2VjdGlvbj4KCiAgICAgIDwhLS0g4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQIFNBRkVUWSDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZAgLS0+CiAgICAgIDxzZWN0aW9uIGNsYXNzPSJzY3JlZW4iIGRhdGEtc2NyZWVuPSJzYWZldHkiPgogICAgICAgIDxkaXYgY2xhc3M9InBhZ2UtaGVhZCI+CiAgICAgICAgICA8cCBjbGFzcz0iZXllYnJvdyI+VHJ1c3QgYnkgZGVzaWduPC9wPgogICAgICAgICAgPGgyPlJpZGUgc2FmZTwvaDI+CiAgICAgICAgICA8cCBjbGFzcz0icGFnZS1zdWIiPlNhZmVndWFyZHMgYnVpbHQgaW50byBldmVyeSB0cmlwIOKAlCBub3QgbGVmdCB0byBjaGFuY2UgYXQgdGhlIGN1cmIuPC9wPgogICAgICAgIDwvZGl2PgogICAgICAgIDxkaXYgY2xhc3M9InNhZmV0eS1saXN0Ij4KICAgICAgICAgIDxkaXYgY2xhc3M9InNhZmV0eS1jYXJkIj4KICAgICAgICAgICAgPGRpdiBjbGFzcz0ic2FmZXR5LWljb24iPvCflJI8L2Rpdj4KICAgICAgICAgICAgPGRpdj48aDM+UHJpdmF0ZSB1bnRpbCBhY2NlcHRlZDwvaDM+PHA+Tm8gZHJpdmVyIG1hcCBmb3IgcmlkZXJzLCBubyBwcmVjaXNlIHBpY2t1cCBmb3IgZHJpdmVycyDigJQgdW50aWwgYSBtYXRjaCBpcyBhY2NlcHRlZC48L3A+PC9kaXY+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIDxkaXYgY2xhc3M9InNhZmV0eS1jYXJkIj4KICAgICAgICAgICAgPGRpdiBjbGFzcz0ic2FmZXR5LWljb24iPvCfqqo8L2Rpdj4KICAgICAgICAgICAgPGRpdj48aDM+SWRlbnRpdHkgJiB2ZWhpY2xlIGNoZWNrczwvaDM+PHA+UGhvbmUgdmVyaWZpY2F0aW9uIGZvciBldmVyeW9uZTsgbGljZW5jZSBhbmQgdmVoaWNsZSBkZXRhaWxzIGZvciBkcml2ZXJzLjwvcD48L2Rpdj4KICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPGRpdiBjbGFzcz0ic2FmZXR5LWNhcmQiPgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJzYWZldHktaWNvbiI+8J+knTwvZGl2PgogICAgICAgICAgICA8ZGl2PjxoMz5TYW1lLWdlbmRlciBtYXRjaGluZzwvaDM+PHA+TWVuIG1hdGNoIHdpdGggbWVuLCB3b21lbiB3aXRoIHdvbWVuIOKAlCBhbHdheXMsIGF1dG9tYXRpY2FsbHkuPC9wPjwvZGl2PgogICAgICAgICAgPC9kaXY+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJzYWZldHktY2FyZCI+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9InNhZmV0eS1pY29uIj7wn5SRPC9kaXY+CiAgICAgICAgICAgIDxkaXY+PGgzPk9uZS10aW1lIHBpY2t1cCBjb2RlPC9oMz48cD5NYXRjaCB0aGUgbmFtZSwgdmVoaWNsZSBhbmQgNC1kaWdpdCBjb2RlIGJlZm9yZSBnZXR0aW5nIGluLjwvcD48L2Rpdj4KICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPGRpdiBjbGFzcz0ic2FmZXR5LWNhcmQiPgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJzYWZldHktaWNvbiI+8J+RizwvZGl2PgogICAgICAgICAgICA8ZGl2PjxoMz5FYXN5IGRlY2xpbmU8L2gzPjxwPkVpdGhlciBwZXJzb24gY2FuIGRlY2xpbmUgd2l0aG91dCBleHBsYW5hdGlvbiwgbm8gcXVlc3Rpb25zIGFza2VkLjwvcD48L2Rpdj4KICAgICAgICAgIDwvZGl2PgogICAgICAgIDwvZGl2PgogICAgICA8L3NlY3Rpb24+CiAgICA8L21haW4+CgogICAgPCEtLSDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZAgVEFCIEJBUiDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZAgLS0+CiAgICA8bmF2IGNsYXNzPSJ0YWJiYXIiIGFyaWEtbGFiZWw9Ik1haW4gbmF2aWdhdGlvbiI+CiAgICAgIDxidXR0b24gY2xhc3M9InRhYiBuYXYtYnRuIGFjdGl2ZSIgZGF0YS1nbz0iaG9tZSI+CiAgICAgICAgPHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGQ9Ik0zIDExbDktOCA5IDh2MTBoLTZ2LTdIOXY3SDN6Ii8+PC9zdmc+CiAgICAgICAgPHNwYW4+SG9tZTwvc3Bhbj4KICAgICAgPC9idXR0b24+CiAgICAgIDxidXR0b24gY2xhc3M9InRhYiBuYXYtYnRuIiBkYXRhLWdvPSJyaWRlIj4KICAgICAgICA8c3ZnIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgMTZ2LTVsMi01aDEwbDIgNXY1Ii8+PHBhdGggZD0iTTQgMTJoMTZNNyAxNnYybTEwLTJ2MiIvPjwvc3ZnPgogICAgICAgIDxzcGFuPlJpZGU8L3NwYW4+CiAgICAgIDwvYnV0dG9uPgogICAgICA8YnV0dG9uIGNsYXNzPSJ0YWIgbmF2LWJ0biB0YWItY2VudGVyIiBkYXRhLWdvPSJkcml2ZSI+CiAgICAgICAgPHNwYW4gY2xhc3M9InRhYi1mYWIiPjxzdmcgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNNCAxN2gxNk02IDE3bDEuNS04aDlMMTggMTdNOSA5VjZoNnYzIi8+PC9zdmc+PC9zcGFuPgogICAgICAgIDxzcGFuPkRyaXZlPC9zcGFuPgogICAgICA8L2J1dHRvbj4KICAgICAgPGJ1dHRvbiBjbGFzcz0idGFiIG5hdi1idG4iIGRhdGEtZ289InNhZmV0eSI+CiAgICAgICAgPHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGQ9Ik0xMiAzbDggNHY1YzAgNS0zLjQgOC4yLTggOS00LjYtLjgtOC00LTgtOVY3bDgtNHoiLz48L3N2Zz4KICAgICAgICA8c3Bhbj5TYWZldHk8L3NwYW4+CiAgICAgIDwvYnV0dG9uPgogICAgPC9uYXY+CiAgPC9kaXY+CgogIDwhLS0g4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQIEFVVEggU0hFRVQg4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQIC0tPgogIDxkaWFsb2cgaWQ9ImF1dGhEaWFsb2ciPgogICAgPGRpdiBjbGFzcz0ic2hlZXQiPgogICAgICA8ZGl2IGNsYXNzPSJzaGVldC1oYW5kbGUiPjwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJzaGVldC1oZWFkIj4KICAgICAgICA8aDIgaWQ9ImF1dGhUaXRsZSI+V2VsY29tZSDwn6SyPC9oMj4KICAgICAgICA8YnV0dG9uIGNsYXNzPSJpY29uLWJ0biBzbSIgZGF0YS1jbG9zZSBhcmlhLWxhYmVsPSJDbG9zZSI+4pyVPC9idXR0b24+CiAgICAgIDwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJzaGVldC1ib2R5Ij4KICAgICAgICA8ZGl2IGlkPSJhdXRoRm9ybXMiPgogICAgICAgICAgPGRpdiBjbGFzcz0ic2VnIiBpZD0iYXV0aFRhYnMiIHN0eWxlPSJtYXJnaW4tYm90dG9tOjIwcHgiPgogICAgICAgICAgICA8YnV0dG9uIGNsYXNzPSJzZWctYnRuIGNob2ljZSBzZWxlY3RlZCIgZGF0YS12YWx1ZT0ic2lnbmluIj5TaWduIGluPC9idXR0b24+CiAgICAgICAgICAgIDxidXR0b24gY2xhc3M9InNlZy1idG4gY2hvaWNlIiBkYXRhLXZhbHVlPSJzaWdudXAiPkNyZWF0ZSBhY2NvdW50PC9idXR0b24+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIDxkaXYgaWQ9InNpZ25pblBhbmUiPgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJmb3JtLWdyb3VwIj48bGFiZWw+RW1haWw8L2xhYmVsPjxpbnB1dCBpZD0ibG9naW5FbWFpbCIgdHlwZT0iZW1haWwiIGF1dG9jb21wbGV0ZT0iZW1haWwiIHBsYWNlaG9sZGVyPSJ5b3VAZXhhbXBsZS5jb20iLz48L2Rpdj4KICAgICAgICAgICAgPGRpdiBjbGFzcz0iZm9ybS1ncm91cCI+PGxhYmVsPlBhc3N3b3JkPC9sYWJlbD48aW5wdXQgaWQ9ImxvZ2luUGFzc3dvcmQiIHR5cGU9InBhc3N3b3JkIiBhdXRvY29tcGxldGU9ImN1cnJlbnQtcGFzc3dvcmQiIHBsYWNlaG9sZGVyPSLigKLigKLigKLigKLigKLigKLigKLigKIiLz48L2Rpdj4KICAgICAgICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuIGJ0bi1wcmltYXJ5IGJ0bi1sZyBidG4tYmxvY2siIGlkPSJkb0xvZ2luIj5TaWduIGluPC9idXR0b24+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIDxkaXYgaWQ9InNpZ251cFBhbmUiIGhpZGRlbj4KICAgICAgICAgICAgPGRpdiBjbGFzcz0iZm9ybS1ncm91cCI+PGxhYmVsPkZ1bGwgbmFtZTwvbGFiZWw+PGlucHV0IGlkPSJzdU5hbWUiIGF1dG9jb21wbGV0ZT0iZ2l2ZW4tbmFtZSIgcGxhY2Vob2xkZXI9IllvdXIgbmFtZSIvPjwvZGl2PgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJmb3JtLWdyb3VwIj48bGFiZWw+RW1haWw8L2xhYmVsPjxpbnB1dCBpZD0ic3VFbWFpbCIgdHlwZT0iZW1haWwiIGF1dG9jb21wbGV0ZT0iZW1haWwiIHBsYWNlaG9sZGVyPSJ5b3VAZXhhbXBsZS5jb20iLz48L2Rpdj4KICAgICAgICAgICAgPGRpdiBjbGFzcz0iZm9ybS1ncm91cCI+PGxhYmVsPlBhc3N3b3JkPC9sYWJlbD48aW5wdXQgaWQ9InN1UGFzc3dvcmQiIHR5cGU9InBhc3N3b3JkIiBhdXRvY29tcGxldGU9Im5ldy1wYXNzd29yZCIgcGxhY2Vob2xkZXI9IkF0IGxlYXN0IDYgY2hhcmFjdGVycyIvPjwvZGl2PgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJmb3JtLWdyb3VwIj48bGFiZWw+SSBhbSBhPC9sYWJlbD4KICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJzZWciIGlkPSJnZW5kZXJDaG9pY2UiPjxidXR0b24gY2xhc3M9InNlZy1idG4gY2hvaWNlIiBkYXRhLXZhbHVlPSJtYWxlIj5Ccm90aGVyPC9idXR0b24+PGJ1dHRvbiBjbGFzcz0ic2VnLWJ0biBjaG9pY2UiIGRhdGEtdmFsdWU9ImZlbWFsZSI+U2lzdGVyPC9idXR0b24+PC9kaXY+CiAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJmb3JtLWdyb3VwIj48bGFiZWw+RG8geW91IG93biBhIGNhcj88L2xhYmVsPgogICAgICAgICAgICAgIDxkaXYgY2xhc3M9InNlZyIgaWQ9ImNhckNob2ljZSI+PGJ1dHRvbiBjbGFzcz0ic2VnLWJ0biBjaG9pY2UiIGRhdGEtdmFsdWU9InllcyI+WWVzLCBJJ2xsIGRyaXZlPC9idXR0b24+PGJ1dHRvbiBjbGFzcz0ic2VnLWJ0biBjaG9pY2UiIGRhdGEtdmFsdWU9Im5vIj5ObywgcmlkZXIgb25seTwvYnV0dG9uPjwvZGl2PgogICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgPGRpdiBpZD0idmVoaWNsZUZpZWxkcyIgaGlkZGVuPgogICAgICAgICAgICAgIDxkaXYgY2xhc3M9ImZvcm0tZ3JvdXAiPjxsYWJlbD5WZWhpY2xlIChvcHRpb25hbCk8L2xhYmVsPjxpbnB1dCBpZD0idmVoaWNsZSIgcGxhY2Vob2xkZXI9ImUuZy4gSG9uZGEgQ2l2aWMiLz48L2Rpdj4KICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJmb3JtLWdyb3VwIj48bGFiZWw+UGxhdGUgZW5kaW5nIChvcHRpb25hbCk8L2xhYmVsPjxpbnB1dCBpZD0icGxhdGUiIG1heGxlbmd0aD0iOCIgcGxhY2Vob2xkZXI9ImUuZy4gMjM1Ii8+PC9kaXY+CiAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICA8YnV0dG9uIGNsYXNzPSJidG4gYnRuLXByaW1hcnkgYnRuLWxnIGJ0bi1ibG9jayIgaWQ9ImRvU2lnbnVwIj5DcmVhdGUgYWNjb3VudDwvYnV0dG9uPgogICAgICAgICAgPC9kaXY+CiAgICAgICAgPC9kaXY+CiAgICAgICAgPGRpdiBpZD0iYWNjb3VudFBhbmUiIGhpZGRlbj4KICAgICAgICAgIDxkaXYgY2xhc3M9ImFjY291bnQtY2FyZCI+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9ImF2YXRhci1sZyIgaWQ9ImFjY0F2YXRhciI+PzwvZGl2PgogICAgICAgICAgICA8ZGl2PjxzdHJvbmcgaWQ9ImFjY05hbWUiPjwvc3Ryb25nPjxwIGNsYXNzPSJtdXRlZCIgaWQ9ImFjY01ldGEiPjwvcD48L2Rpdj4KICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuIGJ0bi1kYW5nZXItZ2hvc3QgYnRuLWJsb2NrIiBpZD0iZG9Mb2dvdXQiPkxvZyBvdXQ8L2J1dHRvbj4KICAgICAgICA8L2Rpdj4KICAgICAgPC9kaXY+CiAgICA8L2Rpdj4KICA8L2RpYWxvZz4KCiAgPCEtLSDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZAgUElOIFNIRUVUIOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkCAtLT4KICA8ZGlhbG9nIGlkPSJwaW5EaWFsb2ciPgogICAgPGRpdiBjbGFzcz0ic2hlZXQiPgogICAgICA8ZGl2IGNsYXNzPSJzaGVldC1oYW5kbGUiPjwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJzaGVldC1oZWFkIj4KICAgICAgICA8aDI+Q29uZmlybSBwaWNrdXA8L2gyPgogICAgICAgIDxidXR0b24gY2xhc3M9Imljb24tYnRuIHNtIiBpZD0icGluQ2xvc2UiIGFyaWEtbGFiZWw9IkNsb3NlIj7inJU8L2J1dHRvbj4KICAgICAgPC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9InNoZWV0LWJvZHkiIHN0eWxlPSJ0ZXh0LWFsaWduOmNlbnRlciI+CiAgICAgICAgPHAgY2xhc3M9Im11dGVkIj5Bc2sgdGhlIHJpZGVyIGZvciB0aGVpciA0LWRpZ2l0IGNvZGUsIHRoZW4gZW50ZXIgaXQgdG8gc3RhcnQgdGhlIHJpZGUuPC9wPgogICAgICAgIDxpbnB1dCBpZD0icGlja3VwQ29kZSIgaW5wdXRtb2RlPSJudW1lcmljIiBtYXhsZW5ndGg9IjQiIHBsYWNlaG9sZGVyPSLigKLigKLigKLigKIiIGNsYXNzPSJwaW4taW5wdXQiIC8+CiAgICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuIGJ0bi1wcmltYXJ5IGJ0bi1sZyBidG4tYmxvY2siIGlkPSJjb25maXJtUGlja3VwIiBzdHlsZT0ibWFyZ2luLXRvcDoxOHB4Ij5TdGFydCByaWRlPC9idXR0b24+CiAgICAgIDwvZGl2PgogICAgPC9kaXY+CiAgPC9kaWFsb2c+CgogIDxkaXYgY2xhc3M9InRvYXN0IiBpZD0idG9hc3QiIHJvbGU9InN0YXR1cyI+PC9kaXY+CgogIDxzY3JpcHQgc3JjPSJodHRwczovL3VucGtnLmNvbS9tYXBsaWJyZS1nbEA0LjcuMS9kaXN0L21hcGxpYnJlLWdsLmpzIj48L3NjcmlwdD4KICA8c2NyaXB0IHNyYz0iYXBwLmpzIj48L3NjcmlwdD4KPC9ib2R5Pgo8L2h0bWw+Cg==
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#0B5D3B" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕌</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Mosque Carpool</title>
+</head>
+<body>
+  <div class="phone">
+    <!-- ══════════ HEADER ══════════ -->
+    <header class="appbar">
+      <div class="appbar-greet">
+        <p class="appbar-eyebrow">Winnipeg · <span id="prayerHint">Fajr</span></p>
+        <h1 id="pageTitle">Salaam 👋</h1>
+      </div>
+      <button class="avatar-btn" id="profileBtn" aria-label="Account">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.3 3.4-6.5 8-6.5s7.3 2.2 8 6.5"/></svg>
+      </button>
+    </header>
+
+    <main class="screens">
+      <!-- ══════════ HOME ══════════ -->
+      <section class="screen active" data-screen="home">
+        <div class="hero-card">
+          <div class="hero-glow"></div>
+          <p class="hero-kicker">A ride can be a sadaqah 🤲</p>
+          <p class="hero-title">Going to the masjid? Bring someone along.</p>
+          <div class="hero-actions">
+            <button class="btn btn-light" data-action="request">
+              <svg viewBox="0 0 24 24"><path d="M5 16v-5l2-5h10l2 5v5"/><path d="M4 12h16M7 16v2m10-2v2"/></svg>
+              Find a ride
+            </button>
+            <button class="btn btn-outline-light" data-action="drive">
+              <svg viewBox="0 0 24 24"><path d="M4 17h16M6 17l1.5-8h9L18 17M9 9V6h6v3"/></svg>
+              Offer a ride
+            </button>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <h2>Nearby mosques</h2>
+          <span class="section-link" id="mosqueCount"></span>
+        </div>
+        <div class="mosque-strip" id="mosqueStrip">
+          <!-- filled by JS -->
+        </div>
+
+        <div class="map-card">
+          <div id="homeMap" class="map"></div>
+        </div>
+
+        <div class="trust-row">
+          <div class="trust-chip">
+            <svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.4 8.2-8 9-4.6-.8-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+            <span>Same-gender matching</span>
+          </div>
+          <div class="trust-chip">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.3 3.4-6.5 8-6.5s7.3 2.2 8 6.5"/></svg>
+            <span>Private until accepted</span>
+          </div>
+          <div class="trust-chip">
+            <svg viewBox="0 0 24 24"><path d="M8 11V7a4 4 0 0 1 8 0v4M6 11h12v10H6z"/></svg>
+            <span>Pickup code check</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════ RIDE ══════════ -->
+      <section class="screen" data-screen="ride">
+        <div class="page-head">
+          <p class="eyebrow">Rider</p>
+          <h2>Where to?</h2>
+          <p class="page-sub">Drivers only see a nearby, same-gender request. Your exact spot stays hidden until one accepts.</p>
+        </div>
+
+        <div id="rideEmpty">
+          <div class="form-card">
+            <div class="form-group">
+              <label>Pickup area</label>
+              <div class="input-row">
+                <input id="pickup" placeholder="Intersection or area" autocomplete="off" />
+                <button class="btn btn-soft btn-sm" id="locateBtn" type="button">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/><circle cx="12" cy="12" r="8"/></svg>
+                  Locate
+                </button>
+              </div>
+              <p class="helper" id="locationStatus">Your precise location is shared only after a driver accepts.</p>
+            </div>
+            <div class="form-group">
+              <label for="rideMosque">Destination mosque</label>
+              <select id="rideMosque"></select>
+            </div>
+            <div class="form-group">
+              <label>Prayer window</label>
+              <div class="seg" id="rideWindow">
+                <button class="seg-btn choice selected" data-value="Fajr">Fajr</button>
+                <button class="seg-btn choice" data-value="Dhuhr">Dhuhr</button>
+                <button class="seg-btn choice" data-value="Asr">Asr</button>
+                <button class="seg-btn choice" data-value="Maghrib / Isha">Maghrib·Isha</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="riders">Seats needed</label>
+              <select id="riders"><option>1 rider</option><option>2 riders</option><option>3 riders</option></select>
+            </div>
+            <button class="btn btn-primary btn-lg btn-block" id="sendRequest">Request ride</button>
+            <a id="rideDirections" class="preview-link" href="#" target="_blank" rel="noopener">Preview route in Maps →</a>
+          </div>
+        </div>
+
+        <div id="matchingState" class="status-card" hidden>
+          <div class="pulse-ring"><div class="pulse-core">🚗</div></div>
+          <p class="eyebrow">Request sent</p>
+          <h2>Finding your driver…</h2>
+          <p class="muted">Nearby same-gender drivers heading to your mosque will see your request. This usually takes a minute or two.</p>
+          <button class="btn btn-ghost btn-block" id="cancelRequest">Cancel request</button>
+        </div>
+
+        <div id="acceptedState" hidden>
+          <div id="acceptedContent"></div>
+          <button class="btn btn-ghost btn-block" style="margin-top:14px" id="resetRide">Done</button>
+        </div>
+      </section>
+
+      <!-- ══════════ DRIVE ══════════ -->
+      <section class="screen" data-screen="drive">
+        <div class="page-head">
+          <p class="eyebrow">Driver</p>
+          <h2>Share your drive</h2>
+          <p class="page-sub">Go online for one mosque. Only same-gender requests nearby can reach you.</p>
+        </div>
+
+        <div class="driver-card">
+          <div class="driver-top">
+            <div>
+              <p class="eyebrow">Status</p>
+              <h3 id="driverStatusText">You're offline</h3>
+            </div>
+            <span class="status-dot" id="statusDot"></span>
+          </div>
+
+          <div id="driverSetup">
+            <div class="form-group">
+              <label for="driveMosque">Driving to</label>
+              <select id="driveMosque"></select>
+            </div>
+            <div class="form-group">
+              <label>Departure window</label>
+              <div class="seg" id="driveWindow">
+                <button class="seg-btn choice selected" data-value="Fajr">Fajr</button>
+                <button class="seg-btn choice" data-value="Dhuhr">Dhuhr</button>
+                <button class="seg-btn choice" data-value="Asr">Asr</button>
+                <button class="seg-btn choice" data-value="Maghrib / Isha">Maghrib·Isha</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="seatCount">Open seats</label>
+              <select id="seatCount"><option>1 seat</option><option selected>2 seats</option><option>3 seats</option><option>4 seats</option></select>
+            </div>
+            <button class="btn btn-primary btn-lg btn-block" id="goOnline">Go online</button>
+          </div>
+
+          <div id="onlinePanel" hidden>
+            <div class="online-banner">
+              <span class="live-dot"></span>
+              <div><strong>You're visible to riders</strong><p>New requests appear below automatically.</p></div>
+            </div>
+            <div class="request-list" id="incomingList"></div>
+            <button class="btn btn-danger-ghost btn-block" style="margin-top:14px" id="goOffline">Go offline</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════ SAFETY ══════════ -->
+      <section class="screen" data-screen="safety">
+        <div class="page-head">
+          <p class="eyebrow">Trust by design</p>
+          <h2>Ride safe</h2>
+          <p class="page-sub">Safeguards built into every trip — not left to chance at the curb.</p>
+        </div>
+        <div class="safety-list">
+          <div class="safety-card">
+            <div class="safety-icon">🔒</div>
+            <div><h3>Private until accepted</h3><p>No driver map for riders, no precise pickup for drivers — until a match is accepted.</p></div>
+          </div>
+          <div class="safety-card">
+            <div class="safety-icon">🪪</div>
+            <div><h3>Identity & vehicle checks</h3><p>Phone verification for everyone; licence and vehicle details for drivers.</p></div>
+          </div>
+          <div class="safety-card">
+            <div class="safety-icon">🤝</div>
+            <div><h3>Same-gender matching</h3><p>Men match with men, women with women — always, automatically.</p></div>
+          </div>
+          <div class="safety-card">
+            <div class="safety-icon">🔑</div>
+            <div><h3>One-time pickup code</h3><p>Match the name, vehicle and 4-digit code before getting in.</p></div>
+          </div>
+          <div class="safety-card">
+            <div class="safety-icon">👋</div>
+            <div><h3>Easy decline</h3><p>Either person can decline without explanation, no questions asked.</p></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ══════════ TAB BAR ══════════ -->
+    <nav class="tabbar" aria-label="Main navigation">
+      <button class="tab nav-btn active" data-go="home">
+        <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10h-6v-7H9v7H3z"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="tab nav-btn" data-go="ride">
+        <svg viewBox="0 0 24 24"><path d="M5 16v-5l2-5h10l2 5v5"/><path d="M4 12h16M7 16v2m10-2v2"/></svg>
+        <span>Ride</span>
+      </button>
+      <button class="tab nav-btn tab-center" data-go="drive">
+        <span class="tab-fab"><svg viewBox="0 0 24 24"><path d="M4 17h16M6 17l1.5-8h9L18 17M9 9V6h6v3"/></svg></span>
+        <span>Drive</span>
+      </button>
+      <button class="tab nav-btn" data-go="safety">
+        <svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.4 8.2-8 9-4.6-.8-8-4-8-9V7l8-4z"/></svg>
+        <span>Safety</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ══════════ AUTH SHEET ══════════ -->
+  <dialog id="authDialog">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head">
+        <h2 id="authTitle">Welcome 🤲</h2>
+        <button class="icon-btn sm" data-close aria-label="Close">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div id="authForms">
+          <div class="seg" id="authTabs" style="margin-bottom:20px">
+            <button class="seg-btn choice selected" data-value="signin">Sign in</button>
+            <button class="seg-btn choice" data-value="signup">Create account</button>
+          </div>
+          <div id="signinPane">
+            <div class="form-group"><label>Email</label><input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com"/></div>
+            <div class="form-group"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••"/></div>
+            <button class="btn btn-primary btn-lg btn-block" id="doLogin">Sign in</button>
+          </div>
+          <div id="signupPane" hidden>
+            <div class="form-group"><label>Full name</label><input id="suName" autocomplete="given-name" placeholder="Your name"/></div>
+            <div class="form-group"><label>Email</label><input id="suEmail" type="email" autocomplete="email" placeholder="you@example.com"/></div>
+            <div class="form-group"><label>Password</label><input id="suPassword" type="password" autocomplete="new-password" placeholder="At least 6 characters"/></div>
+            <div class="form-group"><label>I am a</label>
+              <div class="seg" id="genderChoice"><button class="seg-btn choice" data-value="male">Brother</button><button class="seg-btn choice" data-value="female">Sister</button></div>
+            </div>
+            <div class="form-group"><label>Do you own a car?</label>
+              <div class="seg" id="carChoice"><button class="seg-btn choice" data-value="yes">Yes, I'll drive</button><button class="seg-btn choice" data-value="no">No, rider only</button></div>
+            </div>
+            <div id="vehicleFields" hidden>
+              <div class="form-group"><label>Vehicle (optional)</label><input id="vehicle" placeholder="e.g. Honda Civic"/></div>
+              <div class="form-group"><label>Plate ending (optional)</label><input id="plate" maxlength="8" placeholder="e.g. 235"/></div>
+            </div>
+            <button class="btn btn-primary btn-lg btn-block" id="doSignup">Create account</button>
+          </div>
+        </div>
+        <div id="accountPane" hidden>
+          <div class="account-card">
+            <div class="avatar-lg" id="accAvatar">?</div>
+            <div><strong id="accName"></strong><p class="muted" id="accMeta"></p></div>
+          </div>
+          <button class="btn btn-danger-ghost btn-block" id="doLogout">Log out</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ══════════ PIN SHEET ══════════ -->
+  <dialog id="pinDialog">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head">
+        <h2>Confirm pickup</h2>
+        <button class="icon-btn sm" id="pinClose" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet-body" style="text-align:center">
+        <p class="muted">Ask the rider for their 4-digit code, then enter it to start the ride.</p>
+        <input id="pickupCode" inputmode="numeric" maxlength="4" placeholder="••••" class="pin-input" />
+        <button class="btn btn-primary btn-lg btn-block" id="confirmPickup" style="margin-top:18px">Start ride</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
